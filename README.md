@@ -56,8 +56,11 @@ Semiformal verification for bug hunting: "The Art of Semi-Formal Bug Hunting." P
 Some useful links:
 --------------------
 Link for Latest ABC: https://github.com/berkeley-abc/abc
+
 Link for Super_prove: https://github.com/berkeley-abc/super_prove
+
 Command to enable each of the above alogithms in ABC:  https://people.eecs.berkeley.edu/~alanmi/abc/
+
 For hwmcc AIG benchmarks http://fmv.jku.at/hwmcc20/index.html#history
 
 Our Working Steps:
