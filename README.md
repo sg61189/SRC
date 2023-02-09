@@ -62,16 +62,3 @@ Link for Super_prove: https://github.com/berkeley-abc/super_prove
 Command to enable each of the above alogithms in ABC:  https://people.eecs.berkeley.edu/~alanmi/abc/
 
 For hwmcc AIG benchmarks http://fmv.jku.at/hwmcc20/index.html#history
-
-Our Working Steps:
-----------------------
-1. Need to understand how super_prove uses different algorithms in parallel
-2. Our algorithm selection will depend upon the current design, the expected result, and property modeling/design properties. 
-   At the high level we can categorize the problem as one of the following:
-    (1) Falsification - find a failing counter example 
-    (2) Proving the property 
-    (3) Equivalence Checking
-    (4) Simplification
-    (5) Bug Indentification
-So, our chosen set of algorithms sometimes will be very specific to the result/goal, e.g, early stage designs may be prone to have more properties falsified for bug indentification.
-3. In order to map to a multi-armed bandit porblem, try to set arms based in these categories and then search for appropriate algos from each category. 
