@@ -1,6 +1,6 @@
 # SRC
 
-A few top algorithms to understand (These ~6 top core algorithms are interesting for us):
+A few top algorithms to understand (top 6/7 core algorithms are interesting for us):
 -----------------------------------------------------------------------------------------
 
 Min Area retiming based on maxflow-mincut algorithm (RET in Expert System paper)
@@ -42,12 +42,15 @@ Equivalence identification and removal:
 Some other Algos -- Abstraction-refinement  techniques:
 ------------------------------------
 "Automatic Abstraction without Counterexamples," K. L. McMillan and N. Amla, Tools and Algorithms for the Construction and Analysis of Systems, 2003.
+
 "A single-instance incremental SAT formulation of proof- and counterexample-based abstraction," N. Een, A. Mishchenko, and N. Amla, FMCAD 2010.
-"GLA: gate-level abstraction revisited," A. Mishchenko, N. Een, R. K. Brayton, J. Baumgartner, H. Mony, and P. K. Nalla, DATE 2013.
-Property Directed Reachability (IC3)
-"Efficient Implementation of Property Directed Reachability," N. Een, A. Mishchenko, R. Brayton, FMCAD, 2011
-Semiformal verification for bug hunting
-"The Art of Semi-Formal Bug Hunting." P. Nalla, R. Gajavelly, J. Baumgartner, H. Mony, R. Kanzelman, A. Ivrii; ICCAD 2016.
+
+"GLA: gate-level abstraction revisited," A. Mishchenko, N. Een, R. K. Brayton, J. Baumgartner, H. Mony, and P. K. Nalla, DATE 2013. 
+
+Property Directed Reachability (IC3):  "Efficient Implementation of Property Directed Reachability," N. Een, A. Mishchenko, R. Brayton, FMCAD, 2011
+
+Semiformal verification for bug hunting: "The Art of Semi-Formal Bug Hunting." P. Nalla, R. Gajavelly, J. Baumgartner, H. Mony, R. Kanzelman, A. Ivrii; ICCAD 2016.
+
 "An effective guidance strategy for abstraction guided simulation." F. M. de Paula, A J. Hu; DAC 2007.
 
 Some useful links:
@@ -57,7 +60,7 @@ Link for Super_prove: https://github.com/berkeley-abc/super_prove
 Command to enable each of the above alogithms in ABC:  https://people.eecs.berkeley.edu/~alanmi/abc/
 For hwmcc AIG benchmarks http://fmv.jku.at/hwmcc20/index.html#history
 
-Few Important Points:
+Our Working Steps:
 ----------------------
 1. Need to understand how super_prove uses different algorithms in parallel
 2. Our algorithm selection will depend upon the current design, the expected result, and property modeling/design properties. 
