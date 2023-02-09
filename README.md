@@ -62,3 +62,7 @@ Link for Super_prove: https://github.com/berkeley-abc/super_prove
 Command to enable each of the above alogithms in ABC:  https://people.eecs.berkeley.edu/~alanmi/abc/
 
 For hwmcc AIG benchmarks http://fmv.jku.at/hwmcc20/index.html#history
+
+Link for AutoTunes: https://symbiyosys.readthedocs.io/en/latest/autotune.html
+
+Documnetation of YoSYSHQ: https://readthedocs.org/projects/symbiyosys/downloads/pdf/lat
