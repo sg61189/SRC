@@ -58,11 +58,14 @@ Some useful links:
 Link for Latest ABC: https://github.com/berkeley-abc/abc
 
 Link for Super_prove: https://github.com/berkeley-abc/super_prove
+Installation of super_prove: https://github.com/sterin/super-prove-build
 
 Command to enable each of the above alogithms in ABC:  https://people.eecs.berkeley.edu/~alanmi/abc/
 
 For hwmcc AIG benchmarks http://fmv.jku.at/hwmcc20/index.html#history
+For AIG related tools and benchmarks: http://fmv.jku.at/aiger/
 
 Link for AutoTunes: https://symbiyosys.readthedocs.io/en/latest/autotune.html
+Documnetation of YoSYSHQ: https://readthedocs.org/projects/symbiyosys/downloads/pdf/latest/
 
-Documnetation of YoSYSHQ: https://readthedocs.org/projects/symbiyosys/downloads/pdf/lat
+
