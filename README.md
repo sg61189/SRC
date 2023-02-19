@@ -68,4 +68,6 @@ For AIG related tools and benchmarks: http://fmv.jku.at/aiger/
 Link for AutoTunes: https://symbiyosys.readthedocs.io/en/latest/autotune.html
 Documnetation of YoSYSHQ: https://readthedocs.org/projects/symbiyosys/downloads/pdf/latest/
 
+New Model Checker Tool: https://www.aere.iastate.edu/modelchecker/ 
+
 
