@@ -11,7 +11,7 @@ DEBUG = True
 # DEBUG = False
 
 
-class eps_bandit:
+class ucb1_bandit:
     '''
     epsilon-greedy k-bandit problem
     
@@ -87,7 +87,7 @@ class eps_bandit:
             pname = os.path.join(PATH, "EBMC")
             cmdName = os.path.join(pname, "ebmc")
             fname = os.path.join(PATH, self.fname)
-            st = [cmdName, fname, "-p", str(self.property),  "--mathsat"]
+            st = [cmdName, fname, "-p", str(self.property), "--mathsat"]
 
         elif a == 4: #abc z3    
             pname = os.path.join(PATH, "EBMC")
@@ -121,6 +121,15 @@ class eps_bandit:
         
         end_time = time.time()
 
+        # if end_time - start_time:
+        #   p.kill()
+        #   print('Killed following call to dReal... ')#, st)
+        #   print('Running call again....') 
+        #   print('\t----- '+str(st))
+        #   (output, err) = p.communicate()
+        #   '''This makes the wait possible'''
+        #   p_status = p.wait() 
+
         '''This will give you the output of the command being executed'''
         if DEBUG:
             print ("\t----- Output: " + str(out),  'out', output)       
@@ -149,12 +158,12 @@ class eps_bandit:
         p = np.random.rand()
         if self.eps == 0 and self.n == 0:
             a = np.random.choice(self.k)
-        elif p < self.eps:
-            # Randomly select an action
-            a = np.random.choice(self.k)
+        # elif p < self.eps:
+        #     # Randomly select an action
+        #     a = np.random.choice(self.k)
         else:
             # Take greedy action
-            a = np.argmax(self.k_reward)
+            a = np.argmax(self.k_reward_max)
         
         # Execute the action and calculate the reward
 
@@ -174,6 +183,8 @@ class eps_bandit:
         
         # Update results for a_k
         self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) / self.k_n[a]
+
+        self.k_reward_max[a] = self.k_reward[a] + np.sqrt(2*np.log(self.n)/self.k_n[a])
 
         # if a >0:
         print('For action {0} reward {1}, updated reward {2}'.format(a, reward, self.k_reward_max))
@@ -203,12 +214,12 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"hi:p:", ["ifile=","propfile="])
     except getopt.GetoptError:
-            print("MAB_eps_greedy.py  -i ifile -p propfile")
+            print("MAB_Ucb1.py  -i ifile -p propfile")
             sys.exit(2)
             
     for opt, arg in opts:
         if opt in ("-h", "--help"):
-            print("MAB_eps_greedy.py -i ifile -p propfile")
+            print("MAB_Ucb1.py -i ifile -p propfile")
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
@@ -237,9 +248,9 @@ def main(argv):
     # Run experiments
     for i in range(episodes):
         # Initialize bandits
-        eps_0 = eps_bandit(k, 0.0, iters,inputfile, prop)
-        eps_01 = eps_bandit(k, 0.01, iters,  inputfile, prop, eps_0.mu.copy())
-        eps_1 = eps_bandit(k, 0.1, iters, inputfile, prop, eps_0.mu.copy())
+        eps_0 = ucb1_bandit(k, 0.0, iters,inputfile, prop)
+        eps_01 = ucb1_bandit(k, 0.01, iters,  inputfile, prop, eps_0.mu.copy())
+        eps_1 = ucb1_bandit(k, 0.1, iters, inputfile, prop, eps_0.mu.copy())
         
         # Run experiments
         eps_0.run()
@@ -258,8 +269,8 @@ def main(argv):
         
     fig1 = plt.figure(figsize=(12,8))
     plt.plot(eps_0_rewards, label="$\epsilon=0$ (greedy)")
-    plt.plot(eps_01_rewards, label="$\epsilon=0.01$")
-    plt.plot(eps_1_rewards, label="$\epsilon=0.1$")
+    # plt.plot(eps_01_rewards, label="$\epsilon=0.01$")
+    # plt.plot(eps_1_rewards, label="$\epsilon=0.1$")
     plt.legend(bbox_to_anchor=(1.3, 0.5))
     plt.xlabel("Iterations")
     plt.ylabel("Average Reward")
@@ -272,8 +283,8 @@ def main(argv):
 
     fig2 = plt.figure(figsize=(12,8))
     plt.bar(bins, eps_0_selection, width = 0.33, color='b',  label="$\epsilon=0$")
-    plt.bar(bins+0.33, eps_01_selection, width=0.33, color='g', label="$\epsilon=0.01$")
-    plt.bar(bins+0.66, eps_1_selection, width=0.33, color='r', label="$\epsilon=0.1$")
+    # plt.bar(bins+0.33, eps_01_selection, width=0.33, color='g', label="$\epsilon=0.01$")
+    # plt.bar(bins+0.66, eps_1_selection, width=0.33, color='r', label="$\epsilon=0.1$")
     plt.legend(bbox_to_anchor=(1.2, 0.5))
     plt.xlim([0,k])
     plt.title("Actions Selected by Each Algorithm")
@@ -288,7 +299,7 @@ def main(argv):
                      columns=["a = " + str(x) for x in range(0, k)])
     print("Percentage of actions selected:")
     print(df)
-    pp = PdfPages("plot_MAB_eps_greedy.pdf")
+    pp = PdfPages("plot_MAB_ucb1.pdf")
     # for fig in figs_ss:
     pp.savefig(fig1)
     pp.savefig(fig2)
