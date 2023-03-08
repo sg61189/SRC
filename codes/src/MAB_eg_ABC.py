@@ -10,23 +10,20 @@ from collections import namedtuple
 PATH = "../"
 DEBUG = True
 DEBUG = False
+
+# MAB policy to select
 EPS_GREEDY = True
-# EPS_GREEDY = False
+# EPS_GREEDY = False # for UCB1
+
+# to determine timeout based on Luby sequence
+LUBY = True
+LUBY = False
+
 T = 10
 
-abc_result =  namedtuple('abc_result', ['frame', 'var', 'cla', 'conf', 'to']) #'io', 'lat', 'ag', 'lev'])
+abc_result =  namedtuple('abc_result', ['frame', 'var', 'cla', 'conf', 'to']) 
 
-# output = '15 + : Var =    8544. Cla =    33378. Conf =   4250. Learn =   4238.    0 MB   6 MB     0.95 sec'
-# # xx = r'[ \t]*([\d]+)[.]+[:][ \t]+Var[ \t]+=[ \t]+([\d]+).[ \t]+Cla[ \t]+=[ \t]+([\d]+).[ \t]+Conf[ \t]+=[ \t]+([\d]+).[.]+'
-# xx = r'[ \t]*([\d]+)[ \t]+[+][ \t]+[:][ \t]+Var[ \t]+=[ \t]+([\d]+).[ \t]+Cla[ \t]+=[ \t]+([\d]+).[ \t]+Conf[ \t]+=[ \t]+([\d]+).[ \t]+Learn[ \t]+=[ \t]+([\d]+)[.]*'
-# m = re.finditer(xx, output, re.M|re.I)
-# print(m)
-# for m1 in m:
-#     print(m1)
-#     sm1 = int(m1.group(1)), int(m1.group(2)), int(m1.group(3)), int(m1.group(4))
-#     print(sm1)   
 
-# exit()
 class eps_bandit:
     '''
     epsilon-greedy k-bandit problem
@@ -45,7 +42,7 @@ class eps_bandit:
         values.
     '''
     
-    def __init__(self, k, eps, iters, timeout = T, fname = '',prop = '', mu='random'):
+    def __init__(self, k, eps, iters, timeout = T, fname = '', mu='random'):
         # Number of arms
         self.k = k
         # Search probability
@@ -61,16 +58,20 @@ class eps_bandit:
         self.reward = np.zeros(iters)
         # Mean reward for each arm
         self.k_reward = np.zeros(k)
-
-        self.k_reward_max = np.zeros(k)
+        # storing the selected value at every run
         self.selections = np.zeros(k)
 
+        # current state of the run; eg - bmc depth
         self.states = np.zeros(k)
+
+        # mean reward in UCB1 policy
+        self.k_reward_max = np.zeros(k)
+
+        # current timeout value
         self.timeout = np.zeros(iters)
 
-        ##
+        ## file name 
         self.fname =  fname
-        self.property = prop
         
         if type(mu) == list or type(mu).__module__ == np.__name__:
             # User-defined averages            
@@ -161,80 +162,66 @@ class eps_bandit:
             if DEBUG:
                 print(output)
             sm2 = []
-            # print(m2)
+
+            # timeout
             to = t
+
+            # if the engine is aborted, then timeout in -1
             if ( 'Aborted' in output):
                 to = -1
-            sm2 = [0,0,0,0,0]
-            # xy = r'[.]*:[ \t]+i//o[ \t]+=[ \t]+([\d]+)//[ \t]+([\d]+)[ \t]+lat[ \t]+=[ \t]+([\d]+)[ \t]+and[ \t]+=[ \t]+([\d]+)[ \t]+lev[ \t]+=([\d]+)'
-            # m2 = re.finditer(xy, output, re.M|re.I)
-            # for m1 in m2:
-            #     sm2 = int(m1.group(1)), int(m1.group(2)), int(m1.group(3)), int(m1.group(4)), int(m1.group(5))
-            #     print(sm2)
 
-            # xx = r'[.]*frame[ \t]+([\d]+).[ \t]+Conf[ \t]+=[ \t]+([\d]+).[ \t]+Imp[ \t]+=[ \t]+([\d]+).[.]+'
-            #r'[.]*frame[ \t]+([\d]+).[ \t]+Conf[ \t]+=[ \t]+([\d]+).[ \t]+Imp[ \t]+=[ \t]+([\d]+).[ \t]+T[ \t]+=[ \t]+([\d]+.[\d]+)[.]+'
+            sm1 = [0,0,0,0,0]
+           
+            # parse the output  to collect information such as bmc depth reached (frame), timeout (to) and other circuit state
 
             if (a == 0): #bmc2
-
                 xx = r'[ \t]+([\d]+)[ \t]+[:][ \t]+F[ \t]+=[ \t]+([\d]+).[ \t]+O[ \t]+=[ \t]+([\d]+).[ \t]+And[ \t]+=[ \t]+([\d]+).[ \t]+Var[ \t]+=[ \t]+([\d]+).[ \t]+Conf[ \t]+=[ \t]+([\d]+)[.]*'
                 m = re.finditer(xx, output, re.M|re.I)
-                # print(m)
                 for m1 in m:
                     sm1 = int(m1.group(1)), int(m1.group(5)), int(m1.group(4)), int(m1.group(6))
                     if DEBUG:
                         print(sm1)      
                     sm = abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], to=to) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
-                    #print(sm)
                 res =  (end_time - start_time), sm
+
             elif (a == 1): #bmc3
-                # output = '15 + : Var =    8544. Cla =    33378. Conf =   4250. Learn =   4238.    0 MB   6 MB     0.95 sec'
-                # xx = r'[ \t]+([\d]+)[.]+[:][ \t]+Var[ \t]+=[ \t]+([\d]+).[ \t]+Cla[ \t]+[=][ \t]+([\d]+).[ \t]+Conf[ \t]+[=][ \t]+([\d]+).[.]+'
                 xx = r'[ \t]*([\d]+)[ \t]+[+][ \t]+[:][ \t]+Var[ \t]+=[ \t]+([\d]+).[ \t]+Cla[ \t]+=[ \t]+([\d]+).[ \t]+Conf[ \t]+=[ \t]+([\d]+).[ \t]+Learn[ \t]+=[ \t]+([\d]+)[.]*'
                 m = re.finditer(xx, output, re.M|re.I)
-                # print(m)
                 for m1 in m:
                     sm1 = int(m1.group(1)), int(m1.group(2)), int(m1.group(3)), int(m1.group(4))
                     if DEBUG:
                         print(sm1)   
                     sm =  abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], to=to) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
+                res =  (end_time - start_time), sm
+            elif (a == 2): # &bmc
+                # print(output)
+                xx = r'Reached[ \t]+timeout[ \t]+[(]([\d]+)[ \t]+seconds[)][ \t]+in[ \t]+frame[ \t]+([\d]+)[.]*'
+                m = re.finditer(xx, output, re.M|re.I)
+                # print(m)
+                for m1 in m:
+                    sm1 = int(m1.group(1)), float(m1.group(2))
+                    # print(sm1)   
+                    sm =  abc_result(frame=sm1[1], conf=0, imp=0, to=sm1[0]) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
                     #print(sm)
                 res =  (end_time - start_time), sm
-            # elif (a == 2): # &bmc
-            #     # print(output)
+            # elif (a == 2): # pdr
             #     xx = r'Reached[ \t]+timeout[ \t]+[(]([\d]+)[ \t]+seconds[)][ \t]+in[ \t]+frame[ \t]+([\d]+)[.]*'
             #     m = re.finditer(xx, output, re.M|re.I)
-            #     # print(m)
             #     for m1 in m:
             #         sm1 = int(m1.group(1)), float(m1.group(2))
-            #         # print(sm1)   
-            #         sm =  abc_result(frame=sm1[1], conf=0, imp=0, to=sm1[0]) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
-            #         #print(sm)
+            #         if DEBUG:
+            #             print(sm1)  
+            #         sm =  abc_result(frame=sm1[1], conf=0, var=0, cla=0, to=sm1[0]) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
             #     res =  (end_time - start_time), sm
-            elif (a == 2): # pdr
-                # print(output)
-                xx = r'Reached[ \t]+timeout[ \t]+[(]([\d]+)[ \t]+seconds[)][ \t]+in[ \t]+frame[ \t]+([\d]+)[.]*'
-                m = re.finditer(xx, output, re.M|re.I)
-                # print(m)
-                for m1 in m:
-                    sm1 = int(m1.group(1)), float(m1.group(2))
-                    if DEBUG:
-                        print(sm1)  
-                    sm =  abc_result(frame=sm1[1], conf=0, var=0, cla=0, to=sm1[0]) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
-                    #print(sm)
-                res =  (end_time - start_time), sm
-            elif (a == 3): # reach
-                # print(output)
-                xx = r'Reached[ \t]+timeout[ \t]+[(]([\d]+)[ \t]+seconds[)][ \t]+in[ \t]+frame[ \t]+([\d]+)[.]*'
-                m = re.finditer(xx, output, re.M|re.I)
-                # print(m)
-                for m1 in m:
-                    sm1 = int(m1.group(1)), float(m1.group(2))
-                    if DEBUG:
-                        print(sm1)
-                    sm =  abc_result(frame=sm1[1], conf=0, var=0, cla=0, to=sm1[0]) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
-                    #print(sm)
-                res =  (end_time - start_time), sm
+            # elif (a == 3): # reach
+            #     xx = r'Reached[ \t]+timeout[ \t]+[(]([\d]+)[ \t]+seconds[)][ \t]+in[ \t]+frame[ \t]+([\d]+)[.]*'
+            #     m = re.finditer(xx, output, re.M|re.I)
+            #     for m1 in m:
+            #         sm1 = int(m1.group(1)), float(m1.group(2))
+            #         if DEBUG:
+            #             print(sm1)
+            #         sm =  abc_result(frame=sm1[1], conf=0, var=0, cla=0, to=sm1[0]) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
+            #     res =  (end_time - start_time), sm
         return res
 
 
@@ -250,29 +237,27 @@ class eps_bandit:
             else:
                 # Take greedy action with probability (1 - eps)
                 a = np.argmax(self.k_reward)
-        else:
+        else: # for UCB1
             if self.eps == 0 and self.n == 0:
                 a = np.random.choice(self.k)
             # elif p < self.eps:
             #     # Randomly select an action
             #     a = np.random.choice(self.k)
             else:
-                # Take greedy action
+                # Take greedy action following UCB1 policy
                 a = np.argmax(self.k_reward_max)
         
         # Execute the action and calculate the reward
-
-        # mem_use, tm = memory_usage(self.get_reward(a))
         tm, sm = self.get_reward(a)
 
-        if sm is None or (self.timeout[self.n] == 0):
-            print('sm None')
+        if sm is None:  # default reward function as 1/(time duration) when no timeout is given
+            print('sm None', sm)
             reward = 1/tm ##-1*mem_use 
-            # if DEBUG:
-            # reward = np.random.normal(self.mu[a], 1)
-        else:
+            #or (self.timeout[self.n] == 0):
+        else: # reward is calculated by number of frames checked by the selected engine
             print('sm = ', sm)
             reward = sm.frame #+ self.states[a] 
+            # store the maximum frame number checked as current state
             self.states[a] = sm.frame - 1 if sm.frame > 0 else sm.frame
         
         # Update counts
@@ -285,30 +270,38 @@ class eps_bandit:
         # Update results for a_k -- stationary
         self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) / self.k_n[a]
 
-        # # Update results for a_k -- non-stationary
+        # # # Update results for a_k -- non-stationary
         # self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) / self.n
 
+        # calculate reward function of UCB1 policy
         self.k_reward_max[a] = self.k_reward[a] + np.sqrt(8*np.log(self.n)/self.k_n[a])
 
-        # if a >0:
         print('------------ ', self.n, self.k_n[a], 'For action {0} reward {1}, updated reward {2}'.format(a, reward, self.k_reward), self.k_reward_max)
         return a
         
     def run(self):
+        # scale factor for luby sequence
+        scale_factor = 8
         for i in range(self.iters):
-            # Luby sequence
-            t = i
-            if t == 0:
-                self.timeout[t] = 1
-            elif t == self.iters-1:
-                self.timeout[t] = 0
-            else:
-                kk = math.log2(t+1)
-                if kk - int(kk) < 0.0000001:
-                    self.timeout[t] = max(int(math.pow(2, int(kk)-1)), 1)
+            if LUBY:
+                # calculating timeout following Luby sequence
+                t = i
+                if t == 0:
+                    self.timeout[t] = 1
+                elif t == self.iters-1:
+                    self.timeout[t] = 0
                 else:
-                    ind = int(t -  math.pow(2, int(kk)-1) + 1)
-                    self.timeout[t] = max(self.timeout[ind], 1)
+                    kk = math.log2(t+1)
+                    if kk - int(kk) < 0.0000001:
+                        self.timeout[t] = scale_factor * max(int(math.pow(2, int(kk)-1)), 1)
+                    else:
+                        ind = int(t -  math.pow(2, int(kk)-1) + 1)
+                        self.timeout[t] = scale_factor * max(self.timeout[ind], 1)
+            else:
+                if i == 0:
+                    self.timeout[i] = scale_factor
+                else:
+                    self.timeout[i] = self.timeout[i-1] * 1.2 
 
             a = self.pull()
             self.reward[i] = self.mean_reward
@@ -348,18 +341,14 @@ def main(argv):
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
-        # elif opt in ("-p", "--propfile"):
-        #     propfile = arg
-    print("Input file is :" , ifile, 'prop', propfile)
+    print("Input file is :" , ifile)
 
 
-    fname = os.path.join(PATH, propfile)
-    prop = ''
-    # with open(fname, "r") as f:
-    #     prop = f.read()
-
+    # number of arms
     k = 3
-    iters = 1000 #10
+
+    # number of steps/iterations/runs per episode
+    iters = 500 #10
 
     eps_0_rewards = np.zeros(iters)
     eps_01_rewards = np.zeros(iters)
@@ -369,17 +358,18 @@ def main(argv):
     eps_01_selection = np.zeros(k)
     eps_1_selection = np.zeros(k)
 
-    episodes = 5 #5
+    # number of episodes, the reward value averaged over these episodes
+    episodes = 1 #5
 
     eps_0_states = []
     eps_01_states = []
     eps_1_states = []
 
 
-    # Initialize bandits
-    eps_0 = eps_bandit(k, 0.0, iters,T, inputfile, prop)
-    eps_01 = eps_bandit(k, 0.01, iters,T,  inputfile, prop, eps_0.mu.copy())
-    eps_1 = eps_bandit(k, 0.1, iters,T, inputfile, prop, eps_0.mu.copy())
+    # Initialize bandits with three different epsilon
+    eps_0 = eps_bandit(k, 0.0, iters,T, inputfile)
+    eps_01 = eps_bandit(k, 0.01, iters,T,  inputfile, eps_0.mu.copy())
+    eps_1 = eps_bandit(k, 0.1, iters,T, inputfile, eps_0.mu.copy())
     
     # Run experiments
     for i in range(episodes):
@@ -409,7 +399,10 @@ def main(argv):
         #     t = 2*eps_0.timeout
         # else: # last run no timeout
         #     t = 0
+
+        # timeout reset to 1s
         t = 1
+        
         eps_0.reset(t, eps_0_states)
         eps_01.reset(t, eps_01_states)
         eps_1.reset(t, eps_1_states)
@@ -421,8 +414,7 @@ def main(argv):
     plt.legend(bbox_to_anchor=(1.3, 0.5))
     plt.xlabel("Iterations")
     plt.ylabel("Average Reward")
-    plt.title("Average $\epsilon-greedy$ Rewards after " + str(episodes) 
-        + " Episodes")
+    plt.title("Average $\epsilon-greedy$ Rewards after " + str(episodes) + " Episodes")
     plt.legend()
     # plt.show()
 
@@ -439,14 +431,11 @@ def main(argv):
     plt.ylabel("Number of Actions Taken")
     # plt.show()
 
-    opt_per = np.array([eps_0_selection, eps_01_selection,
-                       eps_1_selection]) / iters * 100
-    df = pd.DataFrame(opt_per, index=['$\epsilon=0$', 
-        '$\epsilon=0.01$', '$\epsilon=0.1$'],
-                     columns=["a = " + str(x) for x in range(0, k)])
+    opt_per = np.array([eps_0_selection, eps_01_selection, eps_1_selection]) / (episodes * iters) * 100
+    df = pd.DataFrame(opt_per, index=['$\epsilon=0$', '$\epsilon=0.01$', '$\epsilon=0.1$'], columns=["a = " + str(x) for x in range(0, k)])
     print("Percentage of actions selected:")
     print(df)
-    pp = PdfPages("plot_MAB_eg_ABC.pdf")
+    pp = PdfPages("plot_MAB_eg_ABC_all.pdf")
     # for fig in figs_ss:
     pp.savefig(fig1)
     pp.savefig(fig2)

@@ -83,13 +83,13 @@ class eps_bandit:
             fname = os.path.join(PATH, self.fname)
             st = [cmdName, fname, "-p", str(self.property), "--boolector"]
 
-        elif a == 3: #abc mathsat    
+        elif a == 3: #EBMC mathsat    
             pname = os.path.join(PATH, "EBMC")
             cmdName = os.path.join(pname, "ebmc")
             fname = os.path.join(PATH, self.fname)
             st = [cmdName, fname, "-p", str(self.property),  "--mathsat"]
 
-        elif a == 4: #abc z3    
+        elif a == 4: #EBMC z3    
             pname = os.path.join(PATH, "EBMC")
             cmdName = os.path.join(pname, "ebmc")
             fname = os.path.join(PATH, self.fname)
