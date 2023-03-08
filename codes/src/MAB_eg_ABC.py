@@ -109,16 +109,16 @@ class eps_bandit:
             bmc3 -S {1:5d} -T {2:5d} -v -L stdout; print_stats\"".format(fname, sd, t)
             st = ' '.join([cmdName, "-c", command])  #, "--boound", "20"]
 
-        # elif a == 2: #ABC &bmc
-        #     command = "\"read {0}; print_stats; &get; &bmc -S {1} -T 10 -v; print_stats\"".format(fname, sd)
-        #     st = ' '.join([cmdName, "-c", command])  #, "--boound", "20"]
+        elif a == 2: #ABC &bmc
+             command = "\"read {0}; print_stats; &get; &bmc -S {1} -T 10 -v; print_stats\"".format(fname, sd)
+             st = ' '.join([cmdName, "-c", command])  #, "--boound", "20"]
 
-        elif a == 2: #abc pdr    
+        elif a == 3: #abc pdr    
             command = "\"read {0}; print_stats; &get; &dc2;&put;dretime;&get;&lcorr;&dc2;&put;dretime;&get;&scorr;&fraig;&dc2;&put;dretime;&put; print_stats; &get; \
             pdr -v -T {1:5d}; print_stats\"".format(fname, t)
             st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
         
-        elif a == 3:  #ABC reach
+        elif a == 4:  #ABC reach
             command = "\"read {0}; print_stats; &get; &dc2;&put;dretime;&get;&lcorr;&dc2;&put;dretime;&get;&scorr;&fraig;&dc2;&put;dretime;&put; print_stats; &get; \
             reach -T {1:5d} -F 1 -v -L stdout; print_stats\"".format(fname, t)
             st = ' '.join([cmdName, "-c", command])  #, "--boound", "20"]
@@ -201,10 +201,11 @@ class eps_bandit:
                 for m1 in m:
                     sm1 = int(m1.group(1)), float(m1.group(2))
                     # print(sm1)   
-                    sm =  abc_result(frame=sm1[1], conf=0, imp=0, to=sm1[0]) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
+                    sm =  abc_result(frame=sm1[1], conf=0, var=0, cla=0, to=sm1[0])  #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
                     #print(sm)
+                sm =  abc_result(frame=sm1[1], conf=0, var=0, cla=0, to=sm1[0])
                 res =  (end_time - start_time), sm
-            # elif (a == 2): # pdr
+            # elif (a == 3): # pdr
             #     xx = r'Reached[ \t]+timeout[ \t]+[(]([\d]+)[ \t]+seconds[)][ \t]+in[ \t]+frame[ \t]+([\d]+)[.]*'
             #     m = re.finditer(xx, output, re.M|re.I)
             #     for m1 in m:
@@ -213,7 +214,7 @@ class eps_bandit:
             #             print(sm1)  
             #         sm =  abc_result(frame=sm1[1], conf=0, var=0, cla=0, to=sm1[0]) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
             #     res =  (end_time - start_time), sm
-            # elif (a == 3): # reach
+            # elif (a == 4): # reach
             #     xx = r'Reached[ \t]+timeout[ \t]+[(]([\d]+)[ \t]+seconds[)][ \t]+in[ \t]+frame[ \t]+([\d]+)[.]*'
             #     m = re.finditer(xx, output, re.M|re.I)
             #     for m1 in m:
