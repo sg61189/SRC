@@ -136,11 +136,11 @@ class ucb1_bandit:
         
         sys.stdout.flush()
         
-        res = -1
+        res = 0
         if(out == 0):
             # if (a in [0,2,3,4]):
             if( b'SUCCESS' in output):
-                res =  (end_time - start_time)
+                res =  1/(end_time - start_time)
             # if(b'SAT' in output): b'UNSAT' in output or
             #     res = (end_time - start_time)
             # else:
@@ -148,13 +148,14 @@ class ucb1_bandit:
             # elif a == 1:
             # if(b'SUCCESS' in output):
             #     return (end_time - start_time)
-            elif(b'UNKNOWN' in output):
-                res = -1 # res
+            if(b'UNKNOWN' in output):
+                res = 0 # res
         return res
 
 
     def pull(self):
         # Generate random number
+        np.random.seed(self.n)
         p = np.random.rand()
         if self.eps == 0 and self.n == 0:
             a = np.random.choice(self.k)
@@ -168,9 +169,9 @@ class ucb1_bandit:
         # Execute the action and calculate the reward
 
         # mem_use, tm = memory_usage(self.get_reward(a))
-        tm = self.get_reward(a)
+        res = self.get_reward(a)
 
-        reward = 1/tm ##-1*mem_use 
+        reward = res ##-1*mem_use 
         # if DEBUG:
         # reward = np.random.normal(self.mu[a], 1)
         
@@ -184,7 +185,7 @@ class ucb1_bandit:
         # Update results for a_k
         self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) / self.k_n[a]
 
-        self.k_reward_max[a] = self.k_reward[a] + np.sqrt(2*np.log(self.n)/self.k_n[a])
+        self.k_reward_max[a] = self.k_reward[a] + 2*np.sqrt(np.log(self.n)/self.k_n[a])
 
         # if a >0:
         print('For action {0} reward {1}, updated reward {2}'.format(a, reward, self.k_reward_max))
@@ -234,7 +235,7 @@ def main(argv):
         prop = f.read()
 
     k = 5
-    iters = 1000
+    iters = 2000
 
     eps_0_rewards = np.zeros(iters)
     eps_01_rewards = np.zeros(iters)
@@ -254,8 +255,8 @@ def main(argv):
         
         # Run experiments
         eps_0.run()
-        eps_01.run()
-        eps_1.run()
+        # eps_01.run()
+        # eps_1.run()
         
         # Update long-term averages
         eps_0_rewards = eps_0_rewards + (eps_0.reward - eps_0_rewards) / (i + 1)
@@ -268,13 +269,13 @@ def main(argv):
             eps_1_selection[j] += eps_1.selections[j]
         
     fig1 = plt.figure(figsize=(12,8))
-    plt.plot(eps_0_rewards, label="$\epsilon=0$ (greedy)")
+    plt.plot(eps_0_rewards, label="ucb1")
     # plt.plot(eps_01_rewards, label="$\epsilon=0.01$")
     # plt.plot(eps_1_rewards, label="$\epsilon=0.1$")
     plt.legend(bbox_to_anchor=(1.3, 0.5))
     plt.xlabel("Iterations")
     plt.ylabel("Average Reward")
-    plt.title("Average $\epsilon-greedy$ Rewards after " + str(episodes) 
+    plt.title("Average Ucb1 Rewards after " + str(episodes) 
         + " Episodes")
     plt.legend()
     # plt.show()
@@ -282,7 +283,7 @@ def main(argv):
     bins = np.linspace(0, k-1, k)
 
     fig2 = plt.figure(figsize=(12,8))
-    plt.bar(bins, eps_0_selection, width = 0.33, color='b',  label="$\epsilon=0$")
+    plt.bar(bins, eps_0_selection, width = 0.33, color='b',  label="$ucb1$")
     # plt.bar(bins+0.33, eps_01_selection, width=0.33, color='g', label="$\epsilon=0.01$")
     # plt.bar(bins+0.66, eps_1_selection, width=0.33, color='r', label="$\epsilon=0.1$")
     plt.legend(bbox_to_anchor=(1.2, 0.5))
@@ -299,7 +300,7 @@ def main(argv):
                      columns=["a = " + str(x) for x in range(0, k)])
     print("Percentage of actions selected:")
     print(df)
-    pp = PdfPages("plot_MAB_ucb1.pdf")
+    pp = PdfPages("plot_MAB_ucb1_bv.pdf")
     # for fig in figs_ss:
     pp.savefig(fig1)
     pp.savefig(fig2)

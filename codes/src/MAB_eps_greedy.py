@@ -127,11 +127,11 @@ class eps_bandit:
         
         sys.stdout.flush()
         
-        res = -1
+        res = 0
         if(out == 0):
             # if (a in [0,2,3,4]):
-            if( b'SUCCESS' in output):
-                res =  (end_time - start_time)
+            if(b'SUCCESS' in output):
+                res =  1/(end_time - start_time)
             # if(b'SAT' in output): b'UNSAT' in output or
             #     res = (end_time - start_time)
             # else:
@@ -139,13 +139,14 @@ class eps_bandit:
             # elif a == 1:
             # if(b'SUCCESS' in output):
             #     return (end_time - start_time)
-            elif(b'UNKNOWN' in output):
-                res = -1 # res
+            if(b'UNKNOWN' in output):
+                res = 0 # res
         return res
 
 
     def pull(self):
         # Generate random number
+        np.random.seed(self.n)
         p = np.random.rand()
         if self.eps == 0 and self.n == 0:
             a = np.random.choice(self.k)
@@ -159,9 +160,9 @@ class eps_bandit:
         # Execute the action and calculate the reward
 
         # mem_use, tm = memory_usage(self.get_reward(a))
-        tm = self.get_reward(a)
+        res = self.get_reward(a)
 
-        reward = 1/tm ##-1*mem_use 
+        reward = res #max(0, 1/tm) ##-1*mem_use 
         # if DEBUG:
         # reward = np.random.normal(self.mu[a], 1)
         
@@ -176,7 +177,7 @@ class eps_bandit:
         self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) / self.k_n[a]
 
         # if a >0:
-        print('For action {0} reward {1}, updated reward {2}'.format(a, reward, self.k_reward_max))
+        print('For action {0} reward {1}, updated reward {2}'.format(a, reward, self.k_reward))
         return a
         
     def run(self):
@@ -223,7 +224,7 @@ def main(argv):
         prop = f.read()
 
     k = 5
-    iters = 1000
+    iters = 2000
 
     eps_0_rewards = np.zeros(iters)
     eps_01_rewards = np.zeros(iters)
@@ -233,7 +234,7 @@ def main(argv):
     eps_01_selection = np.zeros(k)
     eps_1_selection = np.zeros(k)
 
-    episodes = 10
+    episodes = 100
     # Run experiments
     for i in range(episodes):
         # Initialize bandits
@@ -288,7 +289,7 @@ def main(argv):
                      columns=["a = " + str(x) for x in range(0, k)])
     print("Percentage of actions selected:")
     print(df)
-    pp = PdfPages("plot_MAB_eps_greedy.pdf")
+    pp = PdfPages("plot_MAB_eps_greedy_bv.pdf")
     # for fig in figs_ss:
     pp.savefig(fig1)
     pp.savefig(fig2)
