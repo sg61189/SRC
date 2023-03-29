@@ -73,3 +73,10 @@ New Model Checker Tools:
 
 2. http://www.cprover.org/ebmc/
 
+ICCAD2020 paper: FlowTune: Practical Multi-armed Bandits in Boolean Optimization
+
+Codebase: https://ycunxi.github.io/cunxiyu/
+
+Talk: https://www.youtube.com/watch?v=EPcn5ttp1TM
+
+
