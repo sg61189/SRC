@@ -6,6 +6,7 @@ import pandas as pd
 import os, sys, subprocess, getopt, gc, time, re, math
 from collections import namedtuple
 from enum import Enum
+from scipy import interpolate
 # from memory_profiler import memory_usage
 from abcBMCUtil import *
 
@@ -20,12 +21,13 @@ DIFF = 0 # BMC depth relative
 DIFF = 2 # function of depth, time, memory
 # DIFF = 3 # function number of clauses/time diff
 #DIFF = Enum ('DIFF', ['F1', 'F2', 'F3'])
+FIXED = False
 PDR = False
 MAX_FRAME = 1e4
-MAX_CLAUSE = 1e10
+MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 
-
+Actions = ['bmc2', 'bmc3', 'bmc3rs', 'bmc3j', 'bmc3rg', 'bmcru', 'pdr']
 
 class bandit:
 
@@ -79,19 +81,19 @@ class bandit:
             print('Simplified model', ofname)
 
         if a == 0:    #ABC bmc2
-            asrt, sm = bmc2(ofname, sd, t)
+            asrt, sm, ar_tab = bmc2(ofname, sd, t)
         elif a == 1: #ABC bmc3
-            asrt, sm = bmc3(ofname, sd, t)
-        elif a == 2: #ABC bmc3s
-            asrt, sm = bmc3s(ofname, sd, t)
-        elif a == 3: #ABC bmc3j
-            asrt, sm = bmc3j(ofname, sd, t)
+            asrt, sm, ar_tab = bmc3(ofname, sd, t)
+        elif a == 2: #ABC bmc3rs
+            asrt, sm, ar_tab = bmc3rs(ofname, sd, t)
+        elif a == 3: #ABC bmc3x
+            asrt, sm, ar_tab = bmc3j(ofname, sd, t)
         elif a == 4: #ABC bmc3az
-            asrt, sm = bmc3az(ofname, sd, t)
-        elif a == 5: #ABC bmc3x
-            asrt, sm = bmc3x(ofname, sd, t)
+            asrt, sm, ar_tab = bmc3rg(ofname, sd, t)
+        elif a == 5: #ABC bmc3j
+            asrt, sm, ar_tab = bmc3ru(ofname, sd, t)
         elif a == 6: #ABC pdr
-            asrt, sm = pdr(ofname, t)
+            asrt, sm, ar_tab = pdr(ofname, t)
 
         if sm is not None:
             # print(sm)
@@ -104,55 +106,102 @@ class bandit:
                 reward =  np.exp(0.3*sm.frame/MAX_FRAME + 0.2*sm.cla/MAX_CLAUSE - 0.5*sm.to/MAX_TIME)
             else:
                 reward = sm.cla/(10000 * sm.to) if sm.to > 0 else sm.to
+
             self.states = sm.frame+1 if sm.frame > 0 else sm.frame
         else:
-            sm =  abc_result(frame=sd-1, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt)
+            sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = t)
             if asrt > 0:
                 reward = asrt
             else:
                 reward = 0
         print(reward, sm)
 
-        return reward, sm
+        return reward, sm, ar_tab
 
 
     def run(self):
         totalTime = 0
         seq = []
         sm = None
+        next_to = -1
+
+        frames = []
+        time_outs = []
         for i in range(self.iters):
-            if totalTime > TIMEOUT:
-                print('BMC-depth reached ', self.states)
+            if totalTime >= TIMEOUT:
+                print('BMC-depth reached ', self.states, 'totalTime', totalTime)
                 print('Stopping iteration')
                 break
             if i == 0:
                 self.timeout[i] = T
             else:
-                if sm and sm.to == -1:
-                    self.timeout[i] = self.timeout[i-1] * SC 
+                if FIXED:
+                    if sm and sm.to == -1:
+                        self.timeout[i] = self.timeout[i-1] * SC 
+                    else:
+                        self.timeout[i] = self.timeout[i-1]
                 else:
-                    self.timeout[i] = self.timeout[i-1]
+                    if next_to == -1:
+                        self.timeout[i] = self.timeout[i-1] 
+                    else:
+                        try:
+                            if sm and sm.to == -1:
+                                self.timeout[i] = max(math.ceil(next_to), self.timeout[i-1]*SC)
+                            else:
+                                self.timeout[i] = max(math.ceil(next_to), self.timeout[i-1])
+                        except OverflowError:
+                            self.timeout[i] = self.timeout[i-1]
+                        except ValueError:
+                            self.timeout[i] = self.timeout[i-1]
+            self.timeout[i] = min(self.timeout[i], TIMEOUT - totalTime)
 
-            a, reward, sm = self.pull()
+            print('Next time out', self.timeout[i])
+
+            a, reward, sm, ar_tab = self.pull()
         
             if sm:
-                ss = (a, reward, self.states, sm.to)
-               # seq.append()
+                ss = (Actions[a], self.timeout[i], reward, totalTime, self.states)
+            #   # seq.append()
             else:
-                ss = (a, reward, self.states, -1)
+               ss = (a, -1, reward, -1, self.states)
             seq.append(ss)
-            print('iter ', i, ss, self.timeout[i], totalTime, sm)
             self.reward[i] = self.mean_reward
 
-            if sm and sm.to > 0:
-                totalTime += self.timeout[i]
+            #if sm and sm.to > 0:
+            totalTime += self.timeout[i]
+            print('iter ', i, Actions[a], self.timeout[i], 'totalTime', totalTime, ss, sm)
 
             # self.timeout[i] = T
             if sm and sm.asrt > 0:
-                print('Output asserted at frame ', sm.asrt)
+                print('Output asserted at frame ', sm.asrt, 'totalTime', totalTime)
                 print('Stopping iteration')
                 break
+
+            for frm in ar_tab.keys():
+                sm = ar_tab[frm]
+                frames.append(sm.frame)
+                time_outs.append(sm.to)
+            # if len(frames) > 10:
+            #     ftrain, ttrain = frames[-11:], time_outs[-11:]
+            # else:
+            ftrain, ttrain = frames, time_outs
+            print('Training', ftrain, ttrain)
+            if len(ftrain) > 0:
+                fto = interpolate.interp1d(ftrain, ttrain, fill_value = 'extrapolate')
+                new_frames = np.arange(frames[-1]+1, frames[-1]+3, 1)
+                new_to = fto(new_frames)
+                next_to = np.sum(new_to)
+            else:
+                next_to = -1
+
+            print('predicted time out', new_frames, new_to, 'next time out', next_to)
+
+        while i < self.iters:
+            self.reward[i] = self.mean_reward
+            i += 1
+        print('BMC-depth reached ', sm.frame, 'totalTime', totalTime)
         print('Sequence of actions and BMC depth:', seq)
+        return (sm.frame, sm.asrt, totalTime, seq)
             
     def reset(self, reward):
         # Resets results while keeping settings
@@ -201,12 +250,12 @@ class eps_bandit(bandit):
         else:
             # Take greedy action
             a = np.argmax(self.k_reward)
-        
-        # Execute the action and calculate the reward
 
+        # Execute the action and calculate the reward
         # mem_use, tm = memory_usage(self.get_reward(a))
-        reward,sm = self.get_reward(a)
+        reward, sm, ar_tab = self.get_reward(a)
         
+
         # Update counts
         self.n += 1
         self.k_n[a] += 1
@@ -222,7 +271,7 @@ class eps_bandit(bandit):
 
         # if a >0:
         #print('For action {0} reward {1}, updated reward {2}'.format(a, reward, self.k_reward))
-        return a, reward, sm
+        return a, reward, sm, ar_tab
         
    
 class eps_decay_bandit(bandit):
@@ -257,18 +306,13 @@ class eps_decay_bandit(bandit):
             a = np.argmax(self.k_reward)
         
         # Execute the action and calculate the reward
-
         # mem_use, tm = memory_usage(self.get_reward(a))
-        res, sm = self.get_reward(a)
-
-        reward = res #max(0, 1/tm) ##-1*mem_use 
-        # if DEBUG:
-        # reward = np.random.normal(self.mu[a], 1)
+        reward, sm, ar_tab = self.get_reward(a)
         
         # Update counts
         self.n += 1
         self.k_n[a] += 1
-        
+
         # Update total
         self.mean_reward = self.mean_reward + (reward - self.mean_reward) / self.n
         
@@ -281,7 +325,7 @@ class eps_decay_bandit(bandit):
 
         # if a >0:
         # print('For action {0} reward {1}, updated reward {2}'.format(a, reward, self.k_reward))
-        return a, reward, sm
+        return a, reward, sm, ar_tab
        
 class ucb1_bandit(bandit):
     '''
@@ -309,13 +353,14 @@ class ucb1_bandit(bandit):
     def pull(self):
         # Select action according to UCB Criteria
         a = np.argmax(self.k_ucb_reward)
-             
-        reward,sm = self.get_reward(a) #np.random.normal(self.mu[a], 1)
+
+        # Execute the action and calculate the reward
+        reward, sm, ar_tab = self.get_reward(a) #np.random.normal(self.mu[a], 1)
         
         # Update counts
         self.n += 1
         self.k_n[a] += 1
-         
+
         # Update total
         self.mean_reward = self.mean_reward + (reward - self.mean_reward) / self.n
          
@@ -325,8 +370,8 @@ class ucb1_bandit(bandit):
         else:
             self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) * self.alpha
         
-        self.k_ucb_reward[a] = self.k_reward[a] + self.c * np.sqrt((np.log(self.n)) / self.k_n[a])
-        return a, reward, sm
+        self.k_ucb_reward = self.k_reward + self.c * np.sqrt((np.log(self.n)) / self.k_n)
+        return a, reward, sm, ar_tab
     
 def main(argv):
     
@@ -346,7 +391,7 @@ def main(argv):
             inputfile = arg
     print("Input file is :" , inputfile)
 
-    k = 5 # arms
+    k = 6 # arms
     iters = int((TIMEOUT/T)) 
     #iters = int(np.log((TIMEOUT/T)*(SC-1) +1)/(np.log(SC))) + 1 # time-steps
     episodes = 1 #episodes
@@ -383,6 +428,7 @@ def main(argv):
     j = 0
     all_rewards = []
     all_selection = []
+    all_results = []
     for opt in options:
 
         print('---------------- Running bandit {0} ------------------'.format(labels[j]))
@@ -394,15 +440,15 @@ def main(argv):
             
             print('---- episodes ', i)
             # Run experiments
-            opt.run()
-            
+            res = opt.run()
+
             # Update long-term averages
             rewards = rewards + (opt.reward - rewards) / (i + 1)
-
 
             # Average actions per episode
             selection = selection + (opt.k_n - selection) / (i + 1)
         
+        all_results.append(res)
         all_rewards.append(rewards)
         all_selection.append(selection)
 
@@ -418,9 +464,13 @@ def main(argv):
         # plt.show()
 
         pp.savefig(fig1)   
-
+    print('-------------------------------------------')
+    print()
+    print('Bandit policy: \t BMC depth \t time \t sequence')
     fig2 = plt.figure(figsize=(12,8))
     for j in range(len(options)):
+        d, a, t, s = all_results[j]
+        print('{0}: \t {1} ({4}) \t {2} s \t {3}'.format(labels[j], a if a > 0 else d, t, s, 'assert' if a>0 else ''))
         plt.plot(all_rewards[j], label=labels[j])
         plt.legend(bbox_to_anchor=(1.3, 0.5))
     plt.xlabel("Iterations")
@@ -429,8 +479,8 @@ def main(argv):
     plt.legend()
     pp.savefig(fig2)
 
-    opt_per = np.array(all_selection)
-    df = pd.DataFrame(opt_per, index=labels, columns=["a = " + str(x) for x in range(0, k)])
+    opt_per = np.array(all_selection)/ iters * 100
+    df = pd.DataFrame(opt_per, index=labels, columns=[Actions[x] for x in range(0, k)])
     print("Percentage of actions selected:")
     print(df)
     
