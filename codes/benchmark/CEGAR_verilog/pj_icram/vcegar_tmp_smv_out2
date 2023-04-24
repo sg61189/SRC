@@ -1,0 +1,8 @@
+Constant expression found in a INIT statement in
+file vcegar_tmp_abstract.smv: line 13: 
+The expression is "1".
+It evaluates to "1". Skipping it.
+Constant expression found in a INIT statement in
+file vcegar_tmp_abstract.smv: line 20: 
+The expression is "1".
+It evaluates to "1". Skipping it.

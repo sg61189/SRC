@@ -1,0 +1,207 @@
+#vcegar miim/vMiim.v --p miim/vMiim.prop --i 100 --partition 6
+VCEGAR Loop Iteration 23
+Use the newly generated constrains, from abstract counterexample
+Running SMV
+Warning: NuSMV error see vcegar_tmp_smv_out2 
+Length of the abstract counterexample is 0
+VERIFICATION SUCCESSFUL
+Machine name 
+#No. of iterations done: 23
+#Max no. of iterations : 100
+#Total number of predicates needed: 27 (* 2 including next state preds)
+#Partitioning technique: 6
+#Total #trans clusters [25] Max trans cluster size [2]
+#Total time: 162.925
+#Abstraction time: 17.819
+#Abstract model checking time: 1.901
+#Simulation and Refinement time: 142.787
+#Breakup of simulation and refinement time: #Simulating abstract transition steps: 131.794
+#Simulating the counterexample using BMC: 4.874
+#Simulating the spurious counterexample for unsat core: 6.08
+#Obtaining word level predicates using simplified weakest pre-conditions: 0.039
+----------------------------------------
+
+#vcegar mpeg/mpeg_1.v --p mpeg/mpeg1.prop --i 100
+NOT spurious
+VCEGAR Loop Iteration 4
+Use the newly generated constrains, from abstract counterexample
+Running SMV
+Length of the abstract counterexample is 0
+VERIFICATION SUCCESSFUL
+Machine name 
+#No. of iterations done: 4
+#Max no. of iterations : 100
+#Total number of predicates needed: 9 (* 2 including next state preds)
+#Partitioning technique: 2
+#Total #trans clusters [4] Max trans cluster size [10]
+#Total time: 160.43
+#Abstraction time: 30.313
+#Abstract model checking time: 0.339
+#Simulation and Refinement time: 127.126
+#Breakup of simulation and refinement time: #Simulating abstract transition steps: 102
+#Simulating the counterexample using BMC: 10.283
+#Simulating the spurious counterexample for unsat core: 14.831
+#Obtaining word level predicates using simplified weakest pre-conditions: 0.012
+----------------------------------------
+
+#vcegar mpeg/mpeg_1.v --p mpeg/mpeg2.prop --i 100
+VCEGAR Loop Iteration 4
+Use the newly generated constrains, from abstract counterexample
+Running SMV
+Warning: NuSMV error see vcegar_tmp_smv_out2 
+Length of the abstract counterexample is 0
+VERIFICATION SUCCESSFUL
+Machine name 
+#No. of iterations done: 4
+#Max no. of iterations : 100
+#Total number of predicates needed: 9 (* 2 including next state preds)
+#Partitioning technique: 2
+#Total #trans clusters [5] Max trans cluster size [11]
+#Total time: 196.731
+#Abstraction time: 56.026
+#Abstract model checking time: 0.335
+#Simulation and Refinement time: 137.642
+#Breakup of simulation and refinement time: #Simulating abstract transition steps: 70.49
+#Simulating the counterexample using BMC: 28.191
+#Simulating the spurious counterexample for unsat core: 38.948
+#Obtaining word level predicates using simplified weakest pre-conditions: 0.013
+----------------------------------------
+
+#vcegar pi_bus/main_1.v --p pi_bus/m5.prop --i 100
+9446 variables, 24341 clauses
+SAT checker: negated claim is UNSATISFIABLE, i.e., holds
+Generated 14 cube(s)
+Running SMV
+Length of the abstract counterexample is 0
+VERIFICATION SUCCESSFUL
+Machine name 
+#No. of iterations done: 1
+#Max no. of iterations : 100
+#Total number of predicates needed: 10 (* 2 including next state preds)
+#Partitioning technique: 2
+#Total #trans clusters [6] Max trans cluster size [10]
+#Total time: 19.041
+#Abstraction time: 18.038
+#Abstract model checking time: 0.08
+#Simulation and Refinement time: 0
+#Breakup of simulation and refinement time: #Simulating abstract transition steps: 0
+#Simulating the counterexample using BMC: 0
+#Simulating the spurious counterexample for unsat core: 0
+#Obtaining word level predicates using simplified weakest pre-conditions: 0
+----------------------------------------
+
+#vcegar sdlx/control1.v --p sdlx/control2.prop --i 100
+SAT checker: negated claim is UNSATISFIABLE, i.e., holds
+Generated 4 cube(s)
+Running SMV
+Warning: NuSMV error see vcegar_tmp_smv_out2 
+Length of the abstract counterexample is 0
+VERIFICATION SUCCESSFUL
+Machine name 
+#No. of iterations done: 30
+#Max no. of iterations : 100
+#Total number of predicates needed: 46 (* 2 including next state preds)
+#Partitioning technique: 2
+#Total #trans clusters [15] Max trans cluster size [30]
+#Total time: 605.581
+#Abstraction time: 121.217
+#Abstract model checking time: 80.519
+#Simulation and Refinement time: 403.115
+#Breakup of simulation and refinement time: #Simulating abstract transition steps: 327.439
+#Simulating the counterexample using BMC: 36.869
+#Simulating the spurious counterexample for unsat core: 38.522
+#Obtaining word level predicates using simplified weakest pre-conditions: 0.284
+----------------------------------------
+
+#vcegar usb_phy/usb_phy_1.v --p usb_phy/usb4.prop --i 100 --module usb_rx_phy
+verilog::usb_rx_phy::var::shift_en=1
+verilog::usb_rx_phy::var::synced_d=0
+
+
+gs3092.sp.cs.cmu.edu
+Property does NOT hold!
+Machine name 
+#No. of iterations done: 22
+#Max no. of iterations : 100
+#Total number of predicates needed: 47 (* 2 including next state preds)
+#Partitioning technique: 2
+#Total #trans clusters [24] Max trans cluster size [21]
+#Total time: 392.668
+#Abstraction time: 99.56
+#Abstract model checking time: 58.427
+#Simulation and Refinement time: 211.785
+#Breakup of simulation and refinement time: #Simulating abstract transition steps: 82.94
+#Simulating the counterexample using BMC: 78.492
+#Simulating the spurious counterexample for unsat core: 72.849
+#Obtaining word level predicates using simplified weakest pre-conditions: 0.265
+----------------------------------------
+
+#vcegar cache_coherence/two_processor_bin_2.v --p cache_coherence/prop2_bin.prop --i 100
+1046 variables, 2326 clauses
+SAT checker: negated claim is UNSATISFIABLE, i.e., holds
+Generated 3 cube(s)
+Running SMV
+Length of the abstract counterexample is 0
+VERIFICATION SUCCESSFUL
+Machine name 
+#No. of iterations done: 7
+#Max no. of iterations : 100
+#Total number of predicates needed: 25 (* 2 including next state preds)
+#Partitioning technique: 2
+#Total #trans clusters [9] Max trans cluster size [28]
+#Total time: 204.408
+#Abstraction time: 122.459
+#Abstract model checking time: 15.699
+#Simulation and Refinement time: 65.631
+#Breakup of simulation and refinement time: #Simulating abstract transition steps: 26.549
+#Simulating the counterexample using BMC: 18.195
+#Simulating the spurious counterexample for unsat core: 20.437
+#Obtaining word level predicates using simplified weakest pre-conditions: 0.45
+----------------------------------------
+
+#vcegar itc99_b12/b12_1.v --p itc99_b12/b12_1.prop --i 100
+verilog::main::var::timebase=100001
+verilog::main::var::wr=0
+
+
+gs3092.sp.cs.cmu.edu
+Property does NOT hold!
+Machine name 
+#No. of iterations done: 12
+#Max no. of iterations : 100
+#Total number of predicates needed: 57 (* 2 including next state preds)
+#Partitioning technique: 2
+#Total #trans clusters [12] Max trans cluster size [65]
+#Total time: 4071.94
+#Abstraction time: 3126.32
+#Abstract model checking time: 19.802
+#Simulation and Refinement time: 792.361
+#Breakup of simulation and refinement time: #Simulating abstract transition steps: 422.309
+#Simulating the counterexample using BMC: 282.272
+#Simulating the spurious counterexample for unsat core: 218.529
+#Obtaining word level predicates using simplified weakest pre-conditions: 2.048
+----------------------------------------
+
+#vcegar itc99_b12/b12_1.v --p itc99_b12/b12_2.prop --i 100
+b36 <=> main::var::gamma = 21
+b37 <=> main::var::gamma = 22
+b38 <=> main::var::gamma = 23
+b39 <=> main::var::gamma = 24
+b40 <=> main::var::gamma = 25
+b8 <=> main::var::ind = 0
+b9 <=> main::var::ind = 1
+b10 <=> main::var::ind = 2
+b11 <=> main::var::ind = 3
+b12 <=> main::var::max = main::var::scan
+b13 <=> 1[0]
+b14 <=> main::var::start
+
+Solving with ZChaff version ZChaff 2003.6.16
+4441 variables, 13170 clauses
+SIZE: 768
+SIZE: 1280
+SIZE: 1792
+SIZE: 2304
+SIZE: 2816
+----------------------------------------
+

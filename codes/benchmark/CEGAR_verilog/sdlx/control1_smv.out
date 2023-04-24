@@ -1,0 +1,9 @@
+{
+/* description */ "(AG ((~((((State[0]=0)&(State[1]=1))&(State[2]=0))&(monitor_nop=0)))|( "
+/* identifier  */ {\prop }
+/* truth value */ 1
+/* loop begins */ 0
+/* time */ 1107640607
+{
+}
+}

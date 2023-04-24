@@ -1,0 +1,65 @@
+{
+time = 1107753040
+time = \property 
+orig_state_vars = 1555
+orig_comb_vars = 933
+last_bmc_depth = 1
+last_bmc_time = 0.280000
+total_bmc_time = 0.360000
+last_mc_time = 10.770000
+total_mc_time = 10.770000
+last_state_vars = 0
+last_comb_vars = 933
+}
+{
+time = 1107753100
+time = \property 
+orig_state_vars = 1555
+orig_comb_vars = 933
+last_bmc_depth = 1
+last_bmc_time = 0.230000
+total_bmc_time = 0.300000
+last_mc_time = 12.900000
+total_mc_time = 12.910000
+last_state_vars = 0
+last_comb_vars = 1552
+}
+{
+time = 1107753575
+time = \property 
+orig_state_vars = 1555
+orig_comb_vars = 934
+last_bmc_depth = 1
+last_bmc_time = 0.260000
+total_bmc_time = 0.330000
+last_mc_time = 12.250000
+total_mc_time = 12.260000
+last_state_vars = 0
+last_comb_vars = 1552
+}
+{
+time = 1107754776
+time = \property 
+orig_state_vars = 1555
+orig_comb_vars = 934
+last_bmc_depth = 1
+last_bmc_time = 0.260000
+total_bmc_time = 0.340000
+last_mc_time = 9.560000
+total_mc_time = 9.560000
+last_state_vars = 0
+last_comb_vars = 934
+}
+{
+time = 1107755021
+time = \property 
+orig_state_vars = 1555
+orig_comb_vars = 934
+last_bmc_depth = 1
+last_bmc_time = 0.280000
+total_bmc_time = 0.340000
+last_mc_time = 9.000000
+total_mc_time = 9.000000
+last_state_vars = 0
+last_comb_vars = 934
+}

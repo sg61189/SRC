@@ -1,0 +1,5 @@
+*** This is NuSMV 2.1.2 (compiled 2002-11-22 12:00:00)
+*** For more information of NuSMV see <http://nusmv.irst.itc.it>
+*** or email to <nusmv-users@irst.itc.it>.
+*** Please report bugs to <nusmv-users@irst.itc.it>.
+-- specification AG (b1 | (!b1 & ((b2 & b0) | !b2))) is true

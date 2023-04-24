@@ -1,0 +1,4 @@
+Constant expression found in a TRANS statement in
+file vcegar_tmp_abstract.smv: line 158: 
+The expression is "1".
+It evaluates to "1". Skipping it.

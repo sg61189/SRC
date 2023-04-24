@@ -1,0 +1,970 @@
+file two_processor_bin_2.v: Parsing
+Converting
+Module identifier is verilog::main
+Added the property 
+~(is_sharedA==1) | (is_sharedB==1)
+
+Initial set of predicates  
+[1] main::var::is_sharedA = 1
+--------------
+[2] main::var::is_sharedB = 1
+--------------
+[3] main::var::is_sharedA
+--------------
+[4] main::var::is_sharedB
+--------------
+Total number of properties added 1 
+ Verififying ~(is_sharedA==1) | (is_sharedB==1)
+*** Starting Verilog CEGAR  Loop ***
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+VCEGAR CEGAR Loop Iteration 1
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Computing partitioned transition relation of the abstraction
+Calling partitioning strategyB : option 2
+Transition relation cluster no. 0 
+b0 <=> next(main::var::is_sharedA) = 1
+b2 <=> next(main::var::is_sharedA)
+
+Solving with ZChaff 2003.6.16
+Generated 2 cube(s)
+Transition relation cluster no. 1 
+b1 <=> next(main::var::is_sharedB) = 1
+b3 <=> next(main::var::is_sharedB)
+
+Solving with ZChaff 2003.6.16
+Generated 2 cube(s)
+Running NuSMV
+NuSMV produced counterexample
+Xx     b0 = 0
+Xx     b1 = 0
+Xx     b2 = 0
+Xx     b3 = 0
+Xx -> State 1.2 <-
+Xx     b0 = 1
+Xx     b2 = 1
+NuSMV counterexample sucessfully read
+Length of the abstract counterexample is 2
+Calling check abstract steps 
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Checking spurious using BMC for length = 2
+Instantiating transition relation 0 1 
+Instantiating transition relation 1 2 
+Instantiating property
+Total no. of properties obtained 1 
+_________________________
+
+Variables: 2084
+Clauses:   5412
+
+Z-Chaff Version: ZChaff 2003.11.04
+Solving vcegar_tmp_spurious_trans.cnf ......
+Instance unsatisfiable
+UNSAT
+zcore vcegar_tmp_spurious_trans.cnf resolve_trace 
+Unsat core cpu time:				0.05
+Encountered a spurious counterexample
+Instantiating transition relation 0 1 
+Instantiating transition relation 1 2 
+Running zchaff  vcegar_tmp_spurious_trans.cnf
+Running zcore vcegar_tmp_spurious_trans.cnf  resolve_trace 
+
+Size of spurious counterexample 2
+# predicates 4
+# predicates 5
+ After refinement 
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+b4 <=> main::pcacheA::var::next_state = 1
+VCEGAR CEGAR Loop Iteration 2
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Computing partitioned transition relation of the abstraction
+Calling partitioning strategyB : option 2
+Transition relation cluster no. 0 
+b4 <=> next(main::pcacheA::var::next_state) = 1
+b4 <=> main::pcacheA::var::next_state = 1
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+
+Solving with ZChaff 2003.6.16
+Generated 16 cube(s)
+Transition relation cluster no. 1 
+b0 <=> next(main::var::is_sharedA) = 1
+b2 <=> next(main::var::is_sharedA)
+b4 <=> main::pcacheA::var::next_state = 1
+
+Solving with ZChaff 2003.6.16
+Generated 4 cube(s)
+Transition relation cluster no. 2 
+b1 <=> next(main::var::is_sharedB) = 1
+b3 <=> next(main::var::is_sharedB)
+Running NuSMV
+NuSMV produced counterexample
+Xx     b0 = 0
+Xx     b1 = 0
+Xx     b2 = 0
+Xx     b3 = 0
+Xx     b4 = 0
+Xx -> State 1.2 <-
+Xx     b0 = 1
+Xx     b2 = 1
+Xx     b4 = 1
+NuSMV counterexample sucessfully read
+Length of the abstract counterexample is 2
+Calling check abstract steps 
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Z-Chaff Version: ZChaff 2003.11.04
+Solving vcegar_tmp_spurious_trans.cnf ......
+Instance unsatisfiable
+UNSAT
+zcore vcegar_tmp_spurious_trans.cnf resolve_trace 
+Unsat core cpu time:				0.03
+Instantiating transition relation 0 1 
+Running zchaff  vcegar_tmp_spurious_trans.cnf
+Running zcore vcegar_tmp_spurious_trans.cnf  resolve_trace 
+
+VCEGAR CEGAR Loop Iteration 3
+Use the newly generated constrains, from abstract counterexample
+Running NuSMV
+NuSMV produced counterexample
+Xx     b0 = 0
+Xx     b1 = 0
+Xx     b2 = 0
+Xx     b3 = 0
+Xx     b4 = 0
+Xx -> State 1.2 <-
+Xx     b1 = 1
+Xx     b3 = 1
+Xx     b4 = 1
+Xx -> State 1.3 <-
+Xx     b0 = 1
+Xx     b1 = 0
+Xx     b2 = 1
+Xx     b3 = 0
+NuSMV counterexample sucessfully read
+Length of the abstract counterexample is 3
+Calling check abstract steps 
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Checking spurious using BMC for length = 3
+Instantiating transition relation 0 1 
+Instantiating transition relation 1 2 
+Instantiating transition relation 2 3 
+Instantiating property
+Total no. of properties obtained 1 
+_________________________
+
+Variables: 2969
+Clauses:   7813
+
+Z-Chaff Version: ZChaff 2003.11.04
+Solving vcegar_tmp_spurious_trans.cnf ......
+Instance unsatisfiable
+UNSAT
+zcore vcegar_tmp_spurious_trans.cnf resolve_trace 
+Unsat core cpu time:				0.07
+Encountered a spurious counterexample
+Instantiating transition relation 0 1 
+Instantiating transition relation 1 2 
+Instantiating transition relation 2 3 
+Running zchaff  vcegar_tmp_spurious_trans.cnf
+Running zcore vcegar_tmp_spurious_trans.cnf  resolve_trace 
+
+Size of spurious counterexample 3
+# predicates 5
+# predicates 6
+ After refinement 
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+b4 <=> main::pcacheA::var::next_state = 1
+b5 <=> main::pcacheB::var::next_state = 1
+VCEGAR CEGAR Loop Iteration 4
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Computing partitioned transition relation of the abstraction
+Calling partitioning strategyB : option 2
+Transition relation cluster no. 0 
+b4 <=> next(main::pcacheA::var::next_state) = 1
+b5 <=> next(main::pcacheB::var::next_state) = 1
+b4 <=> main::pcacheA::var::next_state = 1
+b5 <=> main::pcacheB::var::next_state = 1
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+
+Solving with ZChaff 2003.6.16
+Generated 60 cube(s)
+Transition relation cluster no. 1 
+b0 <=> next(main::var::is_sharedA) = 1
+b2 <=> next(main::var::is_sharedA)
+b4 <=> main::pcacheA::var::next_state = 1
+Transition relation cluster no. 1 
+b1 <=> next(main::var::is_sharedB) = 1
+b3 <=> next(main::var::is_sharedB)
+b5 <=> main::pcacheB::var::next_state = 1
+
+Solving with ZChaff 2003.6.16
+Generated 4 cube(s)
+Running NuSMV
+NuSMV produced counterexample
+Xx     b0 = 0
+Xx     b1 = 0
+Xx     b2 = 0
+Xx     b3 = 0
+Xx     b4 = 0
+Xx     b5 = 0
+Xx -> State 1.2 <-
+Xx     b1 = 1
+Xx     b3 = 1
+Xx     b4 = 1
+Xx     b5 = 1
+Xx -> State 1.3 <-
+Xx     b0 = 1
+Xx     b1 = 0
+Xx     b2 = 1
+Xx     b3 = 0
+NuSMV counterexample sucessfully read
+Length of the abstract counterexample is 3
+Calling check abstract steps 
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Z-Chaff Version: ZChaff 2003.11.04
+Solving vcegar_tmp_spurious_trans.cnf ......
+Instance unsatisfiable
+UNSAT
+zcore vcegar_tmp_spurious_trans.cnf resolve_trace 
+Unsat core cpu time:				0.03
+Instantiating transition relation 0 1 
+Running zchaff  vcegar_tmp_spurious_trans.cnf
+Running zcore vcegar_tmp_spurious_trans.cnf  resolve_trace 
+
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Z-Chaff Version: ZChaff 2003.11.04
+Solving vcegar_tmp_spurious_trans.cnf ......
+Instance unsatisfiable
+UNSAT
+zcore vcegar_tmp_spurious_trans.cnf resolve_trace 
+Unsat core cpu time:				0.02
+Instantiating transition relation 0 1 
+Running zchaff  vcegar_tmp_spurious_trans.cnf
+Running zcore vcegar_tmp_spurious_trans.cnf  resolve_trace 
+
+VCEGAR CEGAR Loop Iteration 5
+Use the newly generated constrains, from abstract counterexample
+Running NuSMV
+NuSMV produced counterexample
+Xx     b0 = 0
+Xx     b1 = 0
+Xx     b2 = 0
+Xx     b3 = 0
+Xx     b4 = 0
+Xx     b5 = 0
+Xx -> State 1.2 <-
+Xx     b4 = 1
+Xx -> State 1.3 <-
+Xx     b0 = 1
+Xx     b2 = 1
+Xx     b5 = 1
+NuSMV counterexample sucessfully read
+Length of the abstract counterexample is 3
+Calling check abstract steps 
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Z-Chaff Version: ZChaff 2003.11.04
+Solving vcegar_tmp_spurious_trans.cnf ......
+Instance unsatisfiable
+UNSAT
+zcore vcegar_tmp_spurious_trans.cnf resolve_trace 
+Unsat core cpu time:				0.06
+Encountered a spurious counterexample
+Instantiating transition relation 0 1 
+Instantiating transition relation 1 2 
+Instantiating transition relation 2 3 
+Running zchaff  vcegar_tmp_spurious_trans.cnf
+Running zcore vcegar_tmp_spurious_trans.cnf  resolve_trace 
+
+Size of spurious counterexample 3
+# predicates 6
+ After refinement 
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+b4 <=> main::pcacheA::var::next_state = 1
+b5 <=> main::pcacheB::var::next_state = 1
+b6 <=> main::bus_arbiter::var::shared_snoop = 0
+b7 <=> main::bus_arbiter::var::shared_snoop = 1
+b8 <=> main::bus_arbiter::var::shared_snoop = 2
+b9 <=> main::bus_arbiter::var::shared_snoop = 3
+b10 <=> main::bus_arbiter::var::shared_snoop = 4
+b11 <=> main::bus_arbiter::var::shared_snoop = 5
+b12 <=> main::pcacheA::var::next_state = 0
+b13 <=> main::pcacheA::var::next_state = 2
+b14 <=> main::pcacheA::var::state = 0
+b15 <=> main::pcacheA::var::state = 1
+b16 <=> main::pcacheB::var::next_state = 0
+b17 <=> main::pcacheB::var::state = 1
+b18 <=> main::bus_arbiter::var::bus_ackA
+b19 <=> main::bus_arbiter::var::bus_ackB
+b20 <=> main::bus_arbiter::var::invalidate
+b21 <=> main::bus_arbiter::var::is_snoop
+VCEGAR CEGAR Loop Iteration 6
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Computing partitioned transition relation of the abstraction
+Calling partitioning strategyB : option 2
+Transition relation cluster no. 0 
+b12 <=> next(main::pcacheA::var::next_state) = 0
+b4 <=> next(main::pcacheA::var::next_state) = 1
+b13 <=> next(main::pcacheA::var::next_state) = 2
+b16 <=> next(main::pcacheB::var::next_state) = 0
+b5 <=> next(main::pcacheB::var::next_state) = 1
+b6 <=> main::bus_arbiter::var::shared_snoop = 0
+b7 <=> main::bus_arbiter::var::shared_snoop = 1
+b8 <=> main::bus_arbiter::var::shared_snoop = 2
+b9 <=> main::bus_arbiter::var::shared_snoop = 3
+b10 <=> main::bus_arbiter::var::shared_snoop = 4
+b11 <=> main::bus_arbiter::var::shared_snoop = 5
+b12 <=> main::pcacheA::var::next_state = 0
+b4 <=> main::pcacheA::var::next_state = 1
+b13 <=> main::pcacheA::var::next_state = 2
+b14 <=> main::pcacheA::var::state = 0
+b15 <=> main::pcacheA::var::state = 1
+b16 <=> main::pcacheB::var::next_state = 0
+b5 <=> main::pcacheB::var::next_state = 1
+b17 <=> main::pcacheB::var::state = 1
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b18 <=> main::bus_arbiter::var::bus_ackA
+b19 <=> main::bus_arbiter::var::bus_ackB
+b20 <=> main::bus_arbiter::var::invalidate
+b21 <=> main::bus_arbiter::var::is_snoop
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+
+Solving with ZChaff 2003.6.16
+SIZE: 256
+SIZE: 768
+SIZE: 1280
+SIZE: 1792
+SIZE: 2304
+SIZE: 2816
+SIZE: 3328
+SIZE: 3840
+SIZE: 4352
+SIZE: 4864
+SIZE: 5376
+SIZE: 5888
+SIZE: 6400
+SIZE: 6912
+SIZE: 7424
+SIZE: 7936
+SIZE: 8448
+SIZE: 8960
+SIZE: 9472
+SIZE: 9984
+SIZE: 10496
+SIZE: 11008
+SIZE: 11520
+SIZE: 12032
+SIZE: 12544
+SIZE: 13056
+Generated 13029 cube(s)
+Transition relation cluster no. 1 
+b20 <=> next(main::bus_arbiter::var::invalidate)
+
+Solving with ZChaff 2003.6.16
+Generated 2 cube(s)
+Transition relation cluster no. 2 
+b6 <=> next(main::bus_arbiter::var::shared_snoop) = 0
+b7 <=> next(main::bus_arbiter::var::shared_snoop) = 1
+b8 <=> next(main::bus_arbiter::var::shared_snoop) = 2
+b9 <=> next(main::bus_arbiter::var::shared_snoop) = 3
+b10 <=> next(main::bus_arbiter::var::shared_snoop) = 4
+b11 <=> next(main::bus_arbiter::var::shared_snoop) = 5
+
+Solving with ZChaff 2003.6.16
+Generated 7 cube(s)
+Transition relation cluster no. 3 
+b18 <=> next(main::bus_arbiter::var::bus_ackA)
+b19 <=> next(main::bus_arbiter::var::bus_ackB)
+b21 <=> next(main::bus_arbiter::var::is_snoop)
+
+Solving with ZChaff 2003.6.16
+Generated 3 cube(s)
+Transition relation cluster no. 4 
+b14 <=> next(main::pcacheA::var::state) = 0
+b15 <=> next(main::pcacheA::var::state) = 1
+b0 <=> next(main::var::is_sharedA) = 1
+b2 <=> next(main::var::is_sharedA)
+b12 <=> main::pcacheA::var::next_state = 0
+b4 <=> main::pcacheA::var::next_state = 1
+b13 <=> main::pcacheA::var::next_state = 2
+
+Solving with ZChaff 2003.6.16
+Generated 8 cube(s)
+Transition relation cluster no. 5 
+b17 <=> next(main::pcacheB::var::state) = 1
+b1 <=> next(main::var::is_sharedB) = 1
+b3 <=> next(main::var::is_sharedB)
+b16 <=> main::pcacheB::var::next_state = 0
+b5 <=> main::pcacheB::var::next_state = 1
+
+Solving with ZChaff 2003.6.16
+Generated 6 cube(s)
+Running NuSMV
+Warning: NuSMV error see vcegar_tmp_smv_out2 
+NuSMV produced counterexample
+Xx     b0 = 0
+Xx     b1 = 0
+Xx     b2 = 0
+Xx     b3 = 0
+Xx     b4 = 0
+Xx     b5 = 0
+Xx     b6 = 1
+Xx     b7 = 0
+Xx     b8 = 0
+Xx     b9 = 0
+Xx     b10 = 0
+Xx     b11 = 0
+Xx     b12 = 1
+Xx     b13 = 0
+Xx     b14 = 0
+Xx     b15 = 0
+Xx     b16 = 1
+Xx     b17 = 0
+Xx     b18 = 0
+Xx     b19 = 0
+Xx     b20 = 0
+Xx     b21 = 0
+Xx -> State 1.2 <-
+Xx     b6 = 0
+Xx     b9 = 1
+Xx     b12 = 0
+Xx     b13 = 1
+Xx     b14 = 1
+Xx     b18 = 1
+Xx     b21 = 1
+Xx -> State 1.3 <-
+Xx     b4 = 1
+Xx     b13 = 0
+Xx     b14 = 0
+Xx     b16 = 0
+Xx -> State 1.4 <-
+Xx     b0 = 1
+Xx     b2 = 1
+Xx     b6 = 1
+Xx     b9 = 0
+Xx     b15 = 1
+Xx     b20 = 1
+NuSMV counterexample sucessfully read
+Length of the abstract counterexample is 4
+Calling check abstract steps 
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Checking spurious using BMC for length = 4
+Instantiating transition relation 0 1 
+Instantiating transition relation 1 2 
+Instantiating transition relation 2 3 
+Instantiating transition relation 3 4 
+Instantiating property
+Total no. of properties obtained 1 
+_________________________
+
+Variables: 3854
+Clauses:   10214
+
+Z-Chaff Version: ZChaff 2003.11.04
+Solving vcegar_tmp_spurious_trans.cnf ......
+Instance unsatisfiable
+UNSAT
+zcore vcegar_tmp_spurious_trans.cnf resolve_trace 
+Unsat core cpu time:				0.09
+Encountered a spurious counterexample
+Instantiating transition relation 0 1 
+Instantiating transition relation 1 2 
+Instantiating transition relation 2 3 
+Instantiating transition relation 3 4 
+Running zchaff  vcegar_tmp_spurious_trans.cnf
+Running zcore vcegar_tmp_spurious_trans.cnf  resolve_trace 
+
+Size of spurious counterexample 4
+# predicates 22
+ After refinement 
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+b4 <=> main::pcacheA::var::next_state = 1
+b5 <=> main::pcacheB::var::next_state = 1
+b6 <=> main::bus_arbiter::var::shared_snoop = 0
+b7 <=> main::bus_arbiter::var::shared_snoop = 1
+b8 <=> main::bus_arbiter::var::shared_snoop = 2
+b9 <=> main::bus_arbiter::var::shared_snoop = 3
+b10 <=> main::bus_arbiter::var::shared_snoop = 4
+b11 <=> main::bus_arbiter::var::shared_snoop = 5
+b12 <=> main::pcacheA::var::next_state = 0
+b13 <=> main::pcacheA::var::next_state = 2
+b14 <=> main::pcacheA::var::state = 0
+b15 <=> main::pcacheA::var::state = 1
+b16 <=> main::pcacheB::var::next_state = 0
+b17 <=> main::pcacheB::var::state = 1
+b18 <=> main::bus_arbiter::var::bus_ackA
+b19 <=> main::bus_arbiter::var::bus_ackB
+b20 <=> main::bus_arbiter::var::invalidate
+b21 <=> main::bus_arbiter::var::is_snoop
+b22 <=> main::pcacheA::var::bus_req
+VCEGAR CEGAR Loop Iteration 7
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Computing partitioned transition relation of the abstraction
+Calling partitioning strategyB : option 2
+Transition relation cluster no. 0 
+b12 <=> next(main::pcacheA::var::next_state) = 0
+b4 <=> next(main::pcacheA::var::next_state) = 1
+b13 <=> next(main::pcacheA::var::next_state) = 2
+b16 <=> next(main::pcacheB::var::next_state) = 0
+b5 <=> next(main::pcacheB::var::next_state) = 1
+b6 <=> main::bus_arbiter::var::shared_snoop = 0
+b7 <=> main::bus_arbiter::var::shared_snoop = 1
+b8 <=> main::bus_arbiter::var::shared_snoop = 2
+b9 <=> main::bus_arbiter::var::shared_snoop = 3
+b10 <=> main::bus_arbiter::var::shared_snoop = 4
+b11 <=> main::bus_arbiter::var::shared_snoop = 5
+b12 <=> main::pcacheA::var::next_state = 0
+b4 <=> main::pcacheA::var::next_state = 1
+b13 <=> main::pcacheA::var::next_state = 2
+b14 <=> main::pcacheA::var::state = 0
+b15 <=> main::pcacheA::var::state = 1
+b16 <=> main::pcacheB::var::next_state = 0
+b5 <=> main::pcacheB::var::next_state = 1
+b17 <=> main::pcacheB::var::state = 1
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b18 <=> main::bus_arbiter::var::bus_ackA
+b19 <=> main::bus_arbiter::var::bus_ackB
+b20 <=> main::bus_arbiter::var::invalidate
+b21 <=> main::bus_arbiter::var::is_snoop
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+Transition relation cluster no. 0 
+b20 <=> next(main::bus_arbiter::var::invalidate)
+b22 <=> main::pcacheA::var::bus_req
+
+Solving with ZChaff 2003.6.16
+Generated 4 cube(s)
+Transition relation cluster no. 1 
+b6 <=> next(main::bus_arbiter::var::shared_snoop) = 0
+b7 <=> next(main::bus_arbiter::var::shared_snoop) = 1
+b8 <=> next(main::bus_arbiter::var::shared_snoop) = 2
+b9 <=> next(main::bus_arbiter::var::shared_snoop) = 3
+b10 <=> next(main::bus_arbiter::var::shared_snoop) = 4
+b11 <=> next(main::bus_arbiter::var::shared_snoop) = 5
+b22 <=> main::pcacheA::var::bus_req
+
+Solving with ZChaff 2003.6.16
+Generated 14 cube(s)
+Transition relation cluster no. 2 
+b22 <=> next(main::pcacheA::var::bus_req)
+b22 <=> main::pcacheA::var::bus_req
+
+Solving with ZChaff 2003.6.16
+Generated 3 cube(s)
+Transition relation cluster no. 3 
+b18 <=> next(main::bus_arbiter::var::bus_ackA)
+b19 <=> next(main::bus_arbiter::var::bus_ackB)
+b21 <=> next(main::bus_arbiter::var::is_snoop)
+b22 <=> main::pcacheA::var::bus_req
+
+Solving with ZChaff 2003.6.16
+Generated 3 cube(s)
+Transition relation cluster no. 4 
+b14 <=> next(main::pcacheA::var::state) = 0
+b15 <=> next(main::pcacheA::var::state) = 1
+b0 <=> next(main::var::is_sharedA) = 1
+b2 <=> next(main::var::is_sharedA)
+b12 <=> main::pcacheA::var::next_state = 0
+b4 <=> main::pcacheA::var::next_state = 1
+b13 <=> main::pcacheA::var::next_state = 2
+Transition relation cluster no. 4 
+b17 <=> next(main::pcacheB::var::state) = 1
+b1 <=> next(main::var::is_sharedB) = 1
+b3 <=> next(main::var::is_sharedB)
+b16 <=> main::pcacheB::var::next_state = 0
+b5 <=> main::pcacheB::var::next_state = 1
+Running NuSMV
+Warning: NuSMV error see vcegar_tmp_smv_out2 
+NuSMV produced counterexample
+Xx     b0 = 0
+Xx     b1 = 0
+Xx     b2 = 0
+Xx     b3 = 0
+Xx     b4 = 0
+Xx     b5 = 0
+Xx     b6 = 1
+Xx     b7 = 0
+Xx     b8 = 0
+Xx     b9 = 0
+Xx     b10 = 0
+Xx     b11 = 0
+Xx     b12 = 1
+Xx     b13 = 0
+Xx     b14 = 0
+Xx     b15 = 0
+Xx     b16 = 1
+Xx     b17 = 0
+Xx     b18 = 0
+Xx     b19 = 0
+Xx     b20 = 0
+Xx     b21 = 0
+Xx     b22 = 0
+Xx -> State 1.2 <-
+Xx     b12 = 0
+Xx     b13 = 1
+Xx     b14 = 1
+Xx     b20 = 1
+Xx -> State 1.3 <-
+Xx     b12 = 1
+Xx     b13 = 0
+Xx     b14 = 0
+Xx     b19 = 1
+Xx     b21 = 1
+Xx -> State 1.4 <-
+Xx     b6 = 0
+Xx     b8 = 1
+Xx     b14 = 1
+Xx     b20 = 0
+Xx -> State 1.5 <-
+Xx     b4 = 1
+Xx     b8 = 0
+Xx     b9 = 1
+Xx     b12 = 0
+Xx -> State 1.6 <-
+Xx     b0 = 1
+Xx     b2 = 1
+Xx     b5 = 1
+Xx     b6 = 1
+Xx     b9 = 0
+Xx     b14 = 0
+Xx     b15 = 1
+Xx     b16 = 0
+Xx     b20 = 1
+NuSMV counterexample sucessfully read
+Length of the abstract counterexample is 6
+Calling check abstract steps 
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Z-Chaff Version: ZChaff 2003.11.04
+Solving vcegar_tmp_spurious_trans.cnf ......
+Instance unsatisfiable
+UNSAT
+zcore vcegar_tmp_spurious_trans.cnf resolve_trace 
+Unsat core cpu time:				0.03
+Instantiating transition relation 0 1 
+Running zchaff  vcegar_tmp_spurious_trans.cnf
+Running zcore vcegar_tmp_spurious_trans.cnf  resolve_trace 
+
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+VCEGAR CEGAR Loop Iteration 8
+Use the newly generated constrains, from abstract counterexample
+Running NuSMV
+Warning: NuSMV error see vcegar_tmp_smv_out2 
+NuSMV produced counterexample
+Xx     b0 = 0
+Xx     b1 = 0
+Xx     b2 = 0
+Xx     b3 = 0
+Xx     b4 = 0
+Xx     b5 = 0
+Xx     b6 = 1
+Xx     b7 = 0
+Xx     b8 = 0
+Xx     b9 = 0
+Xx     b10 = 0
+Xx     b11 = 0
+Xx     b12 = 1
+Xx     b13 = 0
+Xx     b14 = 0
+Xx     b15 = 0
+Xx     b16 = 1
+Xx     b17 = 0
+Xx     b18 = 0
+Xx     b19 = 0
+Xx     b20 = 0
+Xx     b21 = 0
+Xx     b22 = 0
+Xx -> State 1.2 <-
+Xx     b12 = 0
+Xx     b13 = 1
+Xx     b14 = 1
+Xx -> State 1.3 <-
+Xx     b12 = 1
+Xx     b13 = 0
+Xx     b14 = 0
+Xx     b19 = 1
+Xx     b20 = 1
+Xx     b21 = 1
+Xx -> State 1.4 <-
+Xx     b6 = 0
+Xx     b8 = 1
+Xx     b14 = 1
+Xx     b20 = 0
+Xx -> State 1.5 <-
+Xx     b4 = 1
+Xx     b8 = 0
+Xx     b9 = 1
+Xx     b12 = 0
+Xx -> State 1.6 <-
+Xx     b0 = 1
+Xx     b2 = 1
+Xx     b5 = 1
+Xx     b6 = 1
+Xx     b9 = 0
+Xx     b14 = 0
+Xx     b15 = 1
+Xx     b16 = 0
+Xx     b20 = 1
+NuSMV counterexample sucessfully read
+Length of the abstract counterexample is 6
+Calling check abstract steps 
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Instantiating transition relation 0 1 
+Running ZChaff 2003.6.16
+Checking spurious using BMC for length = 6
+Instantiating transition relation 0 1 
+Instantiating transition relation 1 2 
+Instantiating transition relation 2 3 
+Instantiating transition relation 3 4 
+Instantiating transition relation 4 5 
+Instantiating transition relation 5 6 
+Instantiating property
+Total no. of properties obtained 1 
+_________________________
+
+Variables: 5624
+Clauses:   15016
+
+Z-Chaff Version: ZChaff 2003.11.04
+Solving vcegar_tmp_spurious_trans.cnf ......
+Instance unsatisfiable
+UNSAT
+zcore vcegar_tmp_spurious_trans.cnf resolve_trace 
+Unsat core cpu time:				0.13
+Encountered a spurious counterexample
+Instantiating transition relation 0 1 
+Instantiating transition relation 1 2 
+Instantiating transition relation 2 3 
+Instantiating transition relation 3 4 
+Instantiating transition relation 4 5 
+Instantiating transition relation 5 6 
+Running zchaff  vcegar_tmp_spurious_trans.cnf
+Running zcore vcegar_tmp_spurious_trans.cnf  resolve_trace 
+
+Size of spurious counterexample 6
+# predicates 23
+ After refinement 
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+b4 <=> main::pcacheA::var::next_state = 1
+b5 <=> main::pcacheB::var::next_state = 1
+b6 <=> main::bus_arbiter::var::shared_snoop = 0
+b7 <=> main::bus_arbiter::var::shared_snoop = 1
+b8 <=> main::bus_arbiter::var::shared_snoop = 2
+b9 <=> main::bus_arbiter::var::shared_snoop = 3
+b10 <=> main::bus_arbiter::var::shared_snoop = 4
+b11 <=> main::bus_arbiter::var::shared_snoop = 5
+b12 <=> main::pcacheA::var::next_state = 0
+b13 <=> main::pcacheA::var::next_state = 2
+b14 <=> main::pcacheA::var::state = 0
+b15 <=> main::pcacheA::var::state = 1
+b16 <=> main::pcacheB::var::next_state = 0
+b17 <=> main::pcacheB::var::state = 1
+b18 <=> main::bus_arbiter::var::bus_ackA
+b19 <=> main::bus_arbiter::var::bus_ackB
+b20 <=> main::bus_arbiter::var::invalidate
+b21 <=> main::bus_arbiter::var::is_snoop
+b22 <=> main::pcacheA::var::bus_req
+b23 <=> main::pcacheB::var::bus_req
+VCEGAR CEGAR Loop Iteration 9
+
+Solving with ZChaff 2003.6.16
+Generated 1 cube(s)
+
+Computing partitioned transition relation of the abstraction
+Calling partitioning strategyB : option 2
+Transition relation cluster no. 0 
+b12 <=> next(main::pcacheA::var::next_state) = 0
+b4 <=> next(main::pcacheA::var::next_state) = 1
+b13 <=> next(main::pcacheA::var::next_state) = 2
+b16 <=> next(main::pcacheB::var::next_state) = 0
+b5 <=> next(main::pcacheB::var::next_state) = 1
+b6 <=> main::bus_arbiter::var::shared_snoop = 0
+b7 <=> main::bus_arbiter::var::shared_snoop = 1
+b8 <=> main::bus_arbiter::var::shared_snoop = 2
+b9 <=> main::bus_arbiter::var::shared_snoop = 3
+b10 <=> main::bus_arbiter::var::shared_snoop = 4
+b11 <=> main::bus_arbiter::var::shared_snoop = 5
+b12 <=> main::pcacheA::var::next_state = 0
+b4 <=> main::pcacheA::var::next_state = 1
+b13 <=> main::pcacheA::var::next_state = 2
+b14 <=> main::pcacheA::var::state = 0
+b15 <=> main::pcacheA::var::state = 1
+b16 <=> main::pcacheB::var::next_state = 0
+b5 <=> main::pcacheB::var::next_state = 1
+b17 <=> main::pcacheB::var::state = 1
+b0 <=> main::var::is_sharedA = 1
+b1 <=> main::var::is_sharedB = 1
+b18 <=> main::bus_arbiter::var::bus_ackA
+b19 <=> main::bus_arbiter::var::bus_ackB
+b20 <=> main::bus_arbiter::var::invalidate
+b21 <=> main::bus_arbiter::var::is_snoop
+b2 <=> main::var::is_sharedA
+b3 <=> main::var::is_sharedB
+Transition relation cluster no. 0 
+b20 <=> next(main::bus_arbiter::var::invalidate)
+b22 <=> main::pcacheA::var::bus_req
+b23 <=> main::pcacheB::var::bus_req
+
+Solving with ZChaff 2003.6.16
+Generated 7 cube(s)
+Transition relation cluster no. 1 
+b6 <=> next(main::bus_arbiter::var::shared_snoop) = 0
+b7 <=> next(main::bus_arbiter::var::shared_snoop) = 1
+b8 <=> next(main::bus_arbiter::var::shared_snoop) = 2
+b9 <=> next(main::bus_arbiter::var::shared_snoop) = 3
+b10 <=> next(main::bus_arbiter::var::shared_snoop) = 4
+b11 <=> next(main::bus_arbiter::var::shared_snoop) = 5
+b22 <=> main::pcacheA::var::bus_req
+b23 <=> main::pcacheB::var::bus_req
+
+Solving with ZChaff 2003.6.16
+Generated 22 cube(s)
+Transition relation cluster no. 2 
+b22 <=> next(main::pcacheA::var::bus_req)
+b22 <=> main::pcacheA::var::bus_req
+Transition relation cluster no. 2 
+b18 <=> next(main::bus_arbiter::var::bus_ackA)
+b19 <=> next(main::bus_arbiter::var::bus_ackB)
+b21 <=> next(main::bus_arbiter::var::is_snoop)
+b22 <=> main::pcacheA::var::bus_req
+b23 <=> main::pcacheB::var::bus_req
+
+Solving with ZChaff 2003.6.16
+Generated 4 cube(s)
+Transition relation cluster no. 3 
+b14 <=> next(main::pcacheA::var::state) = 0
+b15 <=> next(main::pcacheA::var::state) = 1
+b0 <=> next(main::var::is_sharedA) = 1
+b2 <=> next(main::var::is_sharedA)
+b12 <=> main::pcacheA::var::next_state = 0
+b4 <=> main::pcacheA::var::next_state = 1
+b13 <=> main::pcacheA::var::next_state = 2
+Transition relation cluster no. 3 
+b23 <=> next(main::pcacheB::var::bus_req)
+b23 <=> main::pcacheB::var::bus_req
+
+Solving with ZChaff 2003.6.16
+Generated 3 cube(s)
+Transition relation cluster no. 4 
+b17 <=> next(main::pcacheB::var::state) = 1
+b1 <=> next(main::var::is_sharedB) = 1
+b3 <=> next(main::var::is_sharedB)
+b16 <=> main::pcacheB::var::next_state = 0
+b5 <=> main::pcacheB::var::next_state = 1
+gs3092.sp.cs.cmu.edu
+Running NuSMV
+Length of the abstract counterexample is 0
+VERIFICATION SUCCESSFUL
+Machine name 
+#No. of iterations done: 9
+#Max no. of iterations : 10
+#Total number of predicates needed: 24
+#Partitioning technique: 2
+#Total #trans clusters [8] Max trans cluster size [27]
+#Total time: 36.174
+#Abstraction time: 20.649
+#Abstract model checking time: 8.083
+#Simulation and Refinement time: 7.372
+#Breakup of simulation and refinement time: 
+#Simulating abstract transition steps: 3.253
+#Simulating the counterexample using BMC: 1.289
+#Simulating the spurious counterexample for unsat core: 2.756
+#Obtaining word level predicates using simplified weakest pre-conditions: 0.074
+#Cache sizes: 20,0,15
+#[hits/access] Trans cache:[9/29], Refine cache:[0/0], Init cache:[24/39] 
+#Transitions simulated 21, spurious 4, new constraints 4

@@ -1,0 +1,8 @@
+b0 <=> main::var::EX_MEM_update_pc
+b1 <=> main::var::EX_MEM_valid
+b2 <=> main::var::ID_EX_update_pc
+b3 <=> main::var::ID_EX_valid
+b4 <=> main::var::IF_ID_update_pc
+b5 <=> main::var::IF_ID_valid
+b6 <=> main::var::MEM_WB_update_pc
+b7 <=> main::var::PC_valid

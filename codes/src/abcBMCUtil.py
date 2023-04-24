@@ -198,7 +198,7 @@ def bmc3(ofname, sd, t=0, f=0):
 def bmc3rs(ofname, sd, t=0, f=0):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
-    command = "\"read {0}; print_stats; &get; bmc3 -rs -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
+    command = "\"read {0}; print_stats; &get; bmc3 -s -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
     st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
     out, output =  run_cmd(st)
     res = parse_bmc3(output,t)
@@ -207,11 +207,11 @@ def bmc3rs(ofname, sd, t=0, f=0):
 def bmc3j(ofname, sd, t=0, f=0, j = 2):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
-    command1 = "\"read {0}; print_stats; &get; bmc3 -r -S {1:5d} -T {2:5d} -F {4} -J {3} -v -L stdout; print_stats\"".format(ofname, sd, int(t/2), j, f)
+    command1 = "\"read {0}; print_stats; &get; bmc3  -S {1:5d} -T {2:5d} -F {4} -J {3} -v -L stdout; print_stats\"".format(ofname, sd, int(t/2), j, f)
     #command = "\"read {0}; print_stats; &get; bmc3 -r -C {1:5d} -D {2:5d} -S {3:5d} -T {4:5d} -v -L stdout; print_stats\"".format(ofname, c, d, sd, t,)
     st1 = ' '.join([cmdName, "-c", command1]) #, "--boound", "20"]
     out, output1 =  run_cmd(st1)
-    command2 = "\"read {0}; print_stats; &get; bmc3 -r  -S {1:5d} -T {2:5d} -F {4} -J {3} -v -L stdout; print_stats\"".format(ofname,  sd+1, int(t/2), j, f)
+    command2 = "\"read {0}; print_stats; &get; bmc3  -S {1:5d} -T {2:5d} -F {4} -J {3} -v -L stdout; print_stats\"".format(ofname,  sd+1, int(t/2), j, f)
     st2 = ' '.join([cmdName, "-c", command2]) #, "--boound", "20"]
     out, output2 =  run_cmd(st2)
     res = parse_bmc3('\n'.join([output1,output2]),t, 2)
@@ -221,7 +221,7 @@ def bmc3j(ofname, sd, t=0, f=0, j = 2):
 def bmc3rg(ofname, sd, t=0, f=0):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
-    command = "\"read {0}; print_stats; &get; bmc3 -rg -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t,f)
+    command = "\"read {0}; print_stats; &get; bmc3 -g -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t,f)
     st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
     out, output =  run_cmd(st)
     res = parse_bmc3(output,t)
@@ -230,7 +230,7 @@ def bmc3rg(ofname, sd, t=0, f=0):
 def bmc3ru(ofname, sd, t=0, f=0):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
-    command = "\"read {0}; print_stats; &get; bmc3 -ru -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
+    command = "\"read {0}; print_stats; &get; bmc3 -u -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
     st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
     out, output =  run_cmd(st)
     res = parse_bmc3(output,t)

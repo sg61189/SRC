@@ -1,0 +1,151 @@
+file equiv.v: Parsing
+Converting
+Module identifier is verilog::main
+Added the property 
+out1 == out2
+
+Initial set of predicates  
+[1] main::var::out1 = main::var::out2
+--------------
+Total number of properties added 1 
+ Verififying out1 == out2
+*** Starting VERACITY CEGAR Loop ***
+b0 <=> main::var::out1 = main::var::out2
+VERACITY CEGAR Loop Iteration 1
+Computing initial states of abstract model
+
+warning: ignoring idiv
+  * operands: 
+    0: symbol
+        * identifier: verilog::main::var::in1
+        * type: unsignedbv
+            * width: 8
+            * #little_endian: 1
+            * #offset: 0
+        * #location: 
+          * file: equiv.v
+          * line: 8
+    1: symbol
+        * identifier: verilog::main::var::in2
+        * type: unsignedbv
+            * width: 8
+            * #little_endian: 1
+            * #offset: 0
+        * #location: 
+          * file: equiv.v
+          * line: 8
+  * type: unsignedbv
+      * width: 8
+      * #little_endian: 1
+      * #offset: 0
+  * #location: 
+    * file: equiv.v
+    * line: 8
+Solving with ZChaff version ZChaff 2003.6.16
+Generated 2 cube(s)
+
+Computing partitioned transition relation of the abstraction
+Calling partitioning strategyB : option 2
+
+warning: ignoring idiv
+  * operands: 
+    0: symbol
+        * identifier: verilog::main::var::in1
+        * type: unsignedbv
+            * width: 8
+            * #little_endian: 1
+            * #offset: 0
+        * #location: 
+          * file: equiv.v
+          * line: 8
+    1: symbol
+        * identifier: verilog::main::var::in2
+        * type: unsignedbv
+            * width: 8
+            * #little_endian: 1
+            * #offset: 0
+        * #location: 
+          * file: equiv.v
+          * line: 8
+  * type: unsignedbv
+      * width: 8
+      * #little_endian: 1
+      * #offset: 0
+  * #location: 
+    * file: equiv.v
+    * line: 8
+warning: ignoring idiv
+  * operands: 
+    0: next_symbol
+        * identifier: verilog::main::var::in1
+        * type: unsignedbv
+            * width: 8
+            * #little_endian: 1
+            * #offset: 0
+        * #location: 
+          * file: equiv.v
+          * line: 8
+    1: next_symbol
+        * identifier: verilog::main::var::in2
+        * type: unsignedbv
+            * width: 8
+            * #little_endian: 1
+            * #offset: 0
+        * #location: 
+          * file: equiv.v
+          * line: 8
+  * type: unsignedbv
+      * width: 8
+      * #little_endian: 1
+      * #offset: 0
+  * #location: 
+    * file: equiv.v
+    * line: 8
+Solving with ZChaff version ZChaff 2003.6.16
+Generated 4 cube(s)
+Running SMV
+Warning: NuSMV error see vcegar_tmp_smv_out2 
+SMV produced counterexample
+Xx     b0 = 1
+Xx -> State 1.2 <-
+Xx     b0 = 0
+SMV counterexample sucessfully read
+Length of the abstract counterexample is 2
+Calling check abstract steps 
+Running ZChaff version ZChaff 2003.6.16
+Checking spurious using BMC for length = 2
+Instantiating property
+Total no. of properties obtained 1 
+_________________________
+
+Variables: 2548
+Clauses:   8375
+
+property violated in cycle 0:
+
+Transition system state 0
+----------------------------------------------------
+verilog::main::var::in1=00000000
+verilog::main::var::in2=00000000
+
+
+gs3092.sp.cs.cmu.edu
+Property does NOT hold!
+Machine name 
+#No. of iterations done: 1
+#Max no. of iterations : 10
+#Total number of predicates needed: 1
+#Partitioning technique: 2
+#Total #trans clusters [1] Max trans cluster size [2]
+#Total time: 0.402
+#Abstraction time: 0.156
+#Abstract model checking time: 0.081
+#Simulation and Refinement time: 0
+#Breakup of simulation and refinement time: 
+#Simulating abstract transition steps: 0.047
+#Simulating the counterexample using BMC: 0.083
+#Simulating the spurious counterexample for unsat core: 0
+#Obtaining word level predicates using simplified weakest pre-conditions: 0
+#Cache sizes: 1,0,1
+#[hits/access] Trans cache:[0/1], Refine cache:[0/0], Init cache:[0/1] 
+#Transitions simulated 1, spurious 0, new constraints 0
