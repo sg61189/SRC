@@ -28,8 +28,7 @@ MAX_FRAME = 1e4
 MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 
-time_outs = {}
-Actions = ['bmc2', 'bmc3', 'bmc3rs', 'bmc3j', 'bmc3rg', 'bmcru', 'bmc3r', 'pdr']
+Actions = ['bmc2', 'bmc3', 'bmc3rs', 'bmc3j', 'bmc3rg', 'bmcru', 'pdr']
 
 class bandit:
 
@@ -61,7 +60,7 @@ class bandit:
         # current state of the run; eg - bmc depth
         self.states = 0
 
-    def get_reward(self, a, t1 = -1):
+    def get_reward(self, a):
 
         # get starting depth
         # sd = 0
@@ -76,33 +75,25 @@ class bandit:
 
         st = ''
 
-        if t1  == -1:
-            t = T
-        else:
-            t = int(t1)
+        t = int(self.timeout[self.n])
 
         if self.n == 0:
             simplify(fname, ofname)
             print('Simplified model', ofname)
 
-        sm = None
-        asrt = -1
-        ar_tab = {}
         if a == 0:    #ABC bmc2
             asrt, sm, ar_tab = bmc2(ofname, sd, t)
         elif a == 1: #ABC bmc3
             asrt, sm, ar_tab = bmc3(ofname, sd, t)
         elif a == 2: #ABC bmc3rs
             asrt, sm, ar_tab = bmc3rs(ofname, sd, t)
-        elif a == 3: #ABC bmc3j
+        elif a == 3: #ABC bmc3x
             asrt, sm, ar_tab = bmc3j(ofname, sd, t)
-        elif a == 4: #ABC bmc3g
+        elif a == 4: #ABC bmc3az
             asrt, sm, ar_tab = bmc3rg(ofname, sd, t)
-        elif a == 5: #ABC bmc3u
+        elif a == 5: #ABC bmc3j
             asrt, sm, ar_tab = bmc3ru(ofname, sd, t)
-        elif a == 6: #ABC bmc3r
-            asrt, sm, ar_tab = bmc3r(ofname, sd, t)
-        elif a == 7: #ABC pdr
+        elif a == 6: #ABC pdr
             asrt, sm, ar_tab = pdr(ofname, t)
 
         if sm is not None:
@@ -113,20 +104,17 @@ class bandit:
             elif DIFF == 1:
                 reward = sm.frame
             elif DIFF == 2:
-                pen = t - sm.tt
-                reward =  np.exp(0.5*sm.frame/MAX_FRAME - 0.3*sm.tt/MAX_TIME)
-                # + 0.1*sm.cla/MAX_CLAUSE 
-                #np.exp(0.5*sm.frame/MAX_FRAME + 0.1*sm.cla/MAX_CLAUSE - 0.3*sm.to/MAX_TIME) #-  0.1*pen/MAX_TIME)
-                if asrt > 0:
-                    reward =  np.exp(1 - 0.2*sm.frame/MAX_FRAME - 0.3*sm.tt/MAX_TIME)
+                reward =  np.exp(0.3*sm.frame/MAX_FRAME + 0.2*sm.cla/MAX_CLAUSE - 0.5*sm.to/MAX_TIME)
             else:
                 reward = sm.cla/(10000 * sm.to) if sm.to > 0 else sm.to
+
+            self.states = sm.frame+1 if sm.frame > 0 else sm.frame
         else:
             sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = t)
             if asrt > 0:
                 reward = asrt
             else:
-                reward = -0.5 * np.exp(-0.3*t/MAX_TIME) #np.log(t)
+                reward = -1 * np.log(t)
         print(reward, sm)
 
         return reward, sm, ar_tab
@@ -137,59 +125,32 @@ class bandit:
         seq = []
         sm = None
         next_to = -1
-        next_time = {}
-        # for i in self.iters:
-        #     next_time[i] = -1
-        for a in range(self.k):
-            time_outs.update({a:next_time})
-        frames = {}
+
+        frames = []
+        time_outs = []
         count = 0
         for i in range(self.iters):
             if totalTime >= TIMEOUT:
                 print('BMC-depth reached ', self.states, 'totalTime', totalTime)
                 print('Stopping iteration')
                 break
-            
-            a = self.pull()
-            if i < 2*(self.k):
-                a = i%(self.k)
-
-            # if a in time_outs:
-            #     nextt = time_outs[a]
-            #     if self.states in nextt:
-            #         next_to = nextt[self.states]
-
             if i == 0:
                 self.timeout[i] = T
             else:
                 if FIXED:
-                    if next_to == -1:
-                        if sm and sm.to == -1 and count > 2:
-                            self.timeout[i] = self.timeout[i-1] * SC 
-                            count = 0
-                        else:
-                            self.timeout[i] = self.timeout[i-1]
-                            count = count + 1
+                    if sm and sm.to == -1 and count > 2:
+                        self.timeout[i] = self.timeout[i-1] * SC 
+                        count = 0
                     else:
-                        try:
-                            if sm and sm.to == -1 and count > 2:
-                                self.timeout[i] = max(math.ceil(next_to), self.timeout[i-1]*SC, 480)
-                                count = 0
-                            else:
-                                self.timeout[i] = max(math.ceil(next_to), self.timeout[i-1])
-                                count = count + 1
-
-                        except OverflowError:
-                            self.timeout[i] = self.timeout[i-1]
-                        except ValueError:
-                            self.timeout[i] = self.timeout[i-1]
+                        self.timeout[i] = self.timeout[i-1]
+                        count = count + 1
                 else:
                     if next_to == -1:
                         self.timeout[i] = self.timeout[i-1] 
                     else:
                         try:
                             if sm and sm.to == -1:
-                                self.timeout[i] = max(math.ceil(next_to), self.timeout[i-1]*SC, 480)
+                                self.timeout[i] = max(math.ceil(next_to), self.timeout[i-1]*SC)
                             else:
                                 self.timeout[i] = max(math.ceil(next_to), self.timeout[i-1])
                         except OverflowError:
@@ -198,27 +159,23 @@ class bandit:
                             self.timeout[i] = self.timeout[i-1]
             self.timeout[i] = min(self.timeout[i], TIMEOUT - totalTime)
 
-            print('Next time out', self.timeout[i], next_to)
+            print('Next time out', self.timeout[i])
 
-            a, reward, sm, ar_tab = self.update_policy(a, self.timeout[i])
+            a, reward, sm, ar_tab = self.pull()
 
             tt = sm.tt if sm.asrt > 0  else self.timeout[i]
-
         
             if sm and reward > 0:
                 ss = (Actions[a], tt, reward, totalTime, self.states)
                 seq.append(ss)
-                if i > 2*self.k or i%self.k == self.k-1:
-                    self.states = sm.frame+1 if sm.frame > 0 else sm.frame
             else:
                ss = (a, -1, reward, -1, self.states)
-            
             self.reward[i] = self.mean_reward
 
             if sm and sm.to > 0 and reward > 0:
                 totalTime += tt
                 
-            print('#### iter ', i, Actions[a], 'time taken', tt, self.timeout[i], 'totalTime', totalTime, 'ss', ss, sm)
+            print('iter ', i, Actions[a], tt, self.timeout[i], 'totalTime', totalTime, ss, sm)
 
             # self.timeout[i] = T
             if sm and sm.asrt > 0:
@@ -226,41 +183,26 @@ class bandit:
                 print('Stopping iteration')
                 break
 
-            if a in frames:
-                ftrain, ttrain, ttrain1 = frames[a]
-            else:
-                ftrain, ttrain,ttrain1 = [], [], []
             for frm in ar_tab.keys():
-                sm1 = ar_tab[frm]
-                if sm1.conf > 0:
-                    ftrain.append(sm1.frame)
-                    ttrain.append(sm1.cla)
-                    ttrain1.append(sm1.to)
-            frames.update({a:(ftrain, ttrain, ttrain1)})
+                sm = ar_tab[frm]
+                frames.append(sm.frame)
+                time_outs.append(sm.to)
             # if len(frames) > 10:
             #     ftrain, ttrain = frames[-11:], time_outs[-11:]
             # else:
-            if sm.conf > 1e6:
-                # for a in range(self.k):
-                    # if a in frames:
-                    #     ftrain, ttrain = frames[a]
-                    # else:
-                    #     ftrain, ttrain = [], []
-                print('Training for action', a, len(ftrain), len(ttrain))
+            if not FIXED:
+                ftrain, ttrain = frames, time_outs
+                print('Training', ftrain, ttrain)
                 if len(ftrain) > 0:
-                    # predict number of clauses then predict timeout for next frame
-                    fcla = interpolate.interp1d(ftrain, ttrain, fill_value = 'extrapolate')
-                    fto = interpolate.interp1d(ttrain, ttrain1, fill_value = 'extrapolate')
-                    new_frames = np.arange(ftrain[-1]+1, ftrain[-1]+2, 1)
-                    new_cla = fcla(new_frames)
-                    new_to = fto(new_cla)
+                    fto = interpolate.interp1d(ftrain, ttrain, fill_value = 'extrapolate')
+                    new_frames = np.arange(frames[-1]+1, frames[-1]+3, 1)
+                    new_to = fto(new_frames)
                     next_to = np.sum(new_to)
-                    next_time.update({new_frames[0]: new_to[0]})
-                    # print('predicted time out for next frame', new_frames, new_to)
-                # else:
-                #     next_to = -1
-                time_outs.update({a:next_time})
-                # print('next time out', next_to)
+                    print('predicted time out', new_frames, new_to)
+                else:
+                    next_to = -1
+
+                print('next time out', next_to)
 
         while i < self.iters:
             self.reward[i] = self.mean_reward
@@ -309,21 +251,19 @@ class eps_bandit(bandit):
         # np.random.seed(time.time())
         p = np.random.rand()
         if self.eps == 0 and self.n == 0:
-            ap = [1,2,4]
-            a = np.random.choice(ap)
+            a = np.random.choice(self.k)
         elif p < self.eps:
             # Randomly select an action
             a = np.random.choice(self.k)
         else:
             # Take greedy action
             a = np.argmax(self.k_reward)
-        return a
 
-    def update_policy(self, a, t):
         # Execute the action and calculate the reward
         # mem_use, tm = memory_usage(self.get_reward(a))
-        reward, sm, ar_tab = self.get_reward(a, t)
+        reward, sm, ar_tab = self.get_reward(a)
         
+
         # Update counts
         self.n += 1
         self.k_n[a] += 1
@@ -366,21 +306,16 @@ class eps_decay_bandit(bandit):
         # Generate random number
         # np.random.seed(self.n)
         p = np.random.rand()
-        if self.n == 0:
-            ap = [1,2,4]
-            a = np.random.choice(ap)
-        elif p < 1 / (1 + self.n / self.k):
+        if p < 1 / (1 + self.n / self.k):
             # Randomly select an action
             a = np.random.choice(self.k)
         else:
             # Take greedy action
             a = np.argmax(self.k_reward)
-        return a
-
-    def update_policy(self, a, t):
+        
         # Execute the action and calculate the reward
         # mem_use, tm = memory_usage(self.get_reward(a))
-        reward, sm, ar_tab = self.get_reward(a, t)
+        reward, sm, ar_tab = self.get_reward(a)
         
         # Update counts
         self.n += 1
@@ -426,11 +361,9 @@ class ucb1_bandit(bandit):
     def pull(self):
         # Select action according to UCB Criteria
         a = np.argmax(self.k_ucb_reward)
-        return a
 
-    def update_policy(self, a, t):
         # Execute the action and calculate the reward
-        reward, sm, ar_tab = self.get_reward(a, t) #np.random.normal(self.mu[a], 1)
+        reward, sm, ar_tab = self.get_reward(a) #np.random.normal(self.mu[a], 1)
         
         # Update counts
         self.n += 1
@@ -466,8 +399,8 @@ def main(argv):
             inputfile = arg
     print("Input file is :" , inputfile)
 
-    k = 7 # arms
-    iters = 1000 #int((TIMEOUT/T)) 
+    k = 6 # arms
+    iters = int((TIMEOUT/T)) 
     #iters = int(np.log((TIMEOUT/T)*(SC-1) +1)/(np.log(SC))) + 1 # time-steps
     episodes = 1 #episodes
     print('iters', iters)
@@ -506,7 +439,6 @@ def main(argv):
     all_results = []
     for opt in options:
 
-        stime = time.time()
         print('---------------- Running bandit {0} ------------------'.format(labels[j]))
         rewards = np.zeros(iters)
         selection = np.zeros(k)
@@ -540,8 +472,6 @@ def main(argv):
         # plt.show()
 
         pp.savefig(fig1)   
-        etime = time.time()
-        print('time by bandit ', labels[j], (etime-stime)/3600.0)
     print('-------------------------------------------')
     print()
     print('Bandit policy: \t BMC depth \t time \t sequence')

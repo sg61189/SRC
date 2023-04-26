@@ -41,6 +41,7 @@ def run_cmd(command):
     '''This will give you the output of the command being executed'''
     if DEBUG:
         print ("\t----- Output: " + str(out)) #,  'out', output)       
+    print('\t', command) 
     print('\t', output)
 
     sys.stdout.flush()
@@ -199,6 +200,15 @@ def bmc3rs(ofname, sd, t=0, f=0):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
     command = "\"read {0}; print_stats; &get; bmc3 -s -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
+    st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
+    out, output =  run_cmd(st)
+    res = parse_bmc3(output,t)
+    return res
+   
+def bmc3r(ofname, sd, t=0, f=0):
+    pname = os.path.join(PATH, "ABC")
+    cmdName = os.path.join(pname, "abc")
+    command = "\"read {0}; print_stats; &get; bmc3 -r -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
     st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
     out, output =  run_cmd(st)
     res = parse_bmc3(output,t)
