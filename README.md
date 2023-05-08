@@ -53,6 +53,15 @@ Semiformal verification for bug hunting: "The Art of Semi-Formal Bug Hunting." P
 
 "An effective guidance strategy for abstraction guided simulation." F. M. de Paula, A J. Hu; DAC 2007.
 
+Minutes of Meeting with Jason@IBM on 9th March 2023
+--------------------------------------------------------
+
+(1) we can add another BMC arm: abstraction-based bmc - localize the property and explore with BMC, if the localization is smaller and sufficient for the given depth, this might actually improve the BMC-depth since we are exploring on a smaller state space (with more inputs due to localization).  If the localization is not sufficient, the localization spends more time refining the abstraction. I will need look into the ABC abstraction command, and try to get a complete command for one action. 
+
+(2) We should not kill abc's bmc engine, rather have an option to let bmc to stop after a timeout and continue from the same state, I'm not sure about this in ABC, but we can try to study after our initial BMC selection works in MAB method. However, from our current MAB-BMC - once we can make MAB-BMC better than a standalone BMC, then if the selected bmc sequence has consecutively same bmc engine we can think of starting a fresh bmc action vs continue previous bmc action.
+
+(3) we are currently having bmc-time out as fixed, we can make bmc timeout as dynamic, ie., take an early gate/clause count and decide how much time we need to run BMC to get to a reasonable time for SAT exploration within BMC.
+
 MOM with Sudhakar@TI on 4th May 2023
 -----------------------------------------
 The following are the problems that will help lowering the barrier for FV adoption:
