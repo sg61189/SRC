@@ -74,10 +74,11 @@ The following are the problems that will help lowering the barrier for FV adopti
 
 5. Assertion mining based on what the FV engg. has already coded. Usually the FV engg. will have his setup and can you understand the intent from these and mine additional assertions to :
 a. get the same functionality but will be easier on the engines. E.g., the following assertion can be written in two way. In Cadence the second one works faster than the first one
-    i.        Check_pmode_entry_to_LPWR_pmode_fast : assert property ( @(posedge tb_fv_clk) disable iff( ~DUT_sup_por_n_o)     tb_fv_pm_fsm_stop_lfosc_cond [*160] |=>     tb_fv_pmode_state == PM_WAIT   ) ;
-    ii.      Implement a counter (tb_fv_pm_fsm_stop_lfosc_count) that counts tb_fv_pm_fsm_stop_lfosc_cond and modify the highlighted portion of the assertion as below:
-
-tb_fv_pm_fsm_stop_lfosc_cond && (tb_fv_pm_fsm_stop_lfosc_count == 160)
+    i.  Check_pmode_entry_to_LPWR_pmode_fast : assert property ( @(posedge tb_fv_clk) disable iff( ~DUT_sup_por_n_o)     tb_fv_pm_fsm_stop_lfosc_cond [*160] |=>       
+        tb_fv_pmode_state == PM_WAIT) ;
+    
+    ii. Implement a counter (tb_fv_pm_fsm_stop_lfosc_count) that counts tb_fv_pm_fsm_stop_lfosc_cond and modify the highlighted portion of the assertion as below:
+        tb_fv_pm_fsm_stop_lfosc_cond && (tb_fv_pm_fsm_stop_lfosc_count == 160)
 
 b. get better coverage
 
