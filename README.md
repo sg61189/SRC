@@ -69,18 +69,22 @@ The following are the problems that will help lowering the barrier for FV adopti
 
 4.Using Regenerative AI to use “English” or any other language to interact with the tools. For e.g.,
   a. my clock is CLK1 and CLK2
+  
   b. CLK2 is 2x CLK1
+  
   c. CLK2 is asynchronous to CLK1
 
 5. Assertion mining based on what the FV engg. has already coded. Usually the FV engg. will have his setup and can you understand the intent from these and mine additional assertions to :
-a. get the same functionality but will be easier on the engines. E.g., the following assertion can be written in two way. In Cadence the second one works faster than the first one
-    i.  Check_pmode_entry_to_LPWR_pmode_fast : assert property ( @(posedge tb_fv_clk) disable iff( ~DUT_sup_por_n_o)     tb_fv_pm_fsm_stop_lfosc_cond [*160] |=>       
+
+ a. get the same functionality but will be easier on the engines. E.g., the following assertion can be written in two way. In Cadence the second one works faster than the first one
+  
+  i.  Check_pmode_entry_to_LPWR_pmode_fast : assert property ( @(posedge tb_fv_clk) disable iff( ~DUT_sup_por_n_o)     tb_fv_pm_fsm_stop_lfosc_cond [*160] |=>       
         tb_fv_pmode_state == PM_WAIT) ;
     
-    ii. Implement a counter (tb_fv_pm_fsm_stop_lfosc_count) that counts tb_fv_pm_fsm_stop_lfosc_cond and modify the highlighted portion of the assertion as below:
+  ii. Implement a counter (tb_fv_pm_fsm_stop_lfosc_count) that counts tb_fv_pm_fsm_stop_lfosc_cond and modify the highlighted portion of the assertion as below:
         tb_fv_pm_fsm_stop_lfosc_cond && (tb_fv_pm_fsm_stop_lfosc_count == 160)
 
-b. get better coverage
+ b. get better coverage
 
 6. If design has changed use the information from previous design proof to guide faster the new design (Cadence is doing this).
 
