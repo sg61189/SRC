@@ -111,8 +111,9 @@ def parse_bmc2(output, t=0):
 
 def parse_bmc3(output, t=0, scale = 1):
     ar_tab = OrderedDict()
+    once = True
     sm = None
-    xx = r'[ \t]*([\d]+)[ \t]+[+][ \t]+[:][ \t]+Var[ \t]+=[ \t]*([\d]+).[ \t]+Cla[ \t]+=[ \t]*([\d]+).[ \t]+Conf[ \t]+=[ \t]*([\d]+).[ \t]+Learn[ \t]+=[ \t]*([\d]+).[ \t]+.*([\d]+)[ \t]+MB[ \t]+([\d]+)[ \t]+MB[ \t]+([\d]+[.][\d]+)[ \t]+sec'
+    xx = r'[ \t]*([\d]+)[ \t]+[+][ \t]+[:][ \t]+Var[ \t]+=[ \t]*([\d]+).[ \t]+Cla[ \t]+=[ \t]*([\d]+).[ \t]+Conf[ \t]+=[ \t]*([\d]+).[ \t]+Learn[ \t]+=[ \t]*([\d]+).[ \t]+.*([\d]+)[ \t]+MB[ \t]*([\d]+)[ \t]+MB[ \t]+([\d]+[.][\d]+)[ \t]+sec'
     m = re.finditer(xx, output, re.M|re.I)
     if DEBUG:
         print(m)
@@ -152,8 +153,9 @@ def parse_bmc3(output, t=0, scale = 1):
             tt = sm1[7]*scale #if t == 0  else t
             to = sm1[7] - pretm
             sm =  abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = max(sm1[5], sm1[6]), to=to, asrt=asrt, tt=tt) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
-            if DEBUG:
+            if DEBUG or once:
                 print(sm)
+                once = False
             if sm.frame in ar_tab:
                 sm2 = ar_tab[sm.frame]
                 if sm2.to < sm.to:

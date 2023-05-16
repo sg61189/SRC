@@ -172,6 +172,10 @@ class bandit:
 		twice = 0
 		ocount = 0
 		ending = 0
+		critical = 0
+
+		conf_begin_phase = 0
+		max_conf = 0
 		a = 0
 		for i in range(self.iters):
 			if int(TIMEOUT - totalTime) <= 0:
@@ -206,6 +210,8 @@ class bandit:
 
 					if sm and sm.to == -1 and count > 2:
 						next_timeout = self.timeout[i-1] * SC
+						if self.timeout[i] >= 120:
+							critical = 1
 						if ending :
 						#if self.timeout[i-1] > next_timeout > TIMEOUT - (totalTime + self.timeout[i]):
 						#	if count > self.k-1:
@@ -243,7 +249,7 @@ class bandit:
 			else:
 				self.timeout[i] = min(self.timeout[i], TIMEOUT - totalTime)
 
-			print('Next time out', TIMEOUT, self.timeout[i], 'for chosen action', a, Actions[a],  'flag', flag, 'once', once, 'ending', ending)
+			print('Next time out', TIMEOUT, self.timeout[i], 'for chosen action', a, Actions[a], 'ocount', ocount,  'flag', flag, 'once', once, 'ending', ending)
 
 			if self.timeout[i] < 1.0:
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime)
@@ -256,21 +262,30 @@ class bandit:
 			tt = math.ceil(sm.tt) #if sm.asrt > 0  else self.timeout[i]
 		
 			if sm and reward > 0:
-				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, 1e5, 'once', once, flag, (i+1)%self.k)
+				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(2*conf_begin_phase, 1e5), 'once', once, 'flag', flag, 'iter', (i+1)%self.k)
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
-				if (i < repeat_count or flag == 1) and i%self.k == self.k-1:
-					# if flag == 1:
-					# 	print('------ Stopped exploring beginning')
-					# elif i < 2*self.k:
-					# 	print('------ Stopped exploring beginning')
+				if (i < repeat_count ) or (flag == 1) :
 					sd = sm.frame+1 if sm.frame > 0 else sm.frame
 					best_sd = max(best_sd, sd)
-					self.states = best_sd
-					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
-					seq.append(ss)
-					totalTime += tt
+					if (i < repeat_count):
+						max_conf = max(max_conf, sm.conf)
+					print('------ exploring')
+					if (i < repeat_count and i%self.k == self.k-1) or (flag == 1 and ocount == self.k-1) :
+						# if flag == 1:
+						# 	print('------ Stopped exploring beginning')
+						# elif i < 2*self.k:
+						print('------ at the end of exploration')
+						# sd = sm.frame+1 if sm.frame > 0 else sm.frame
+						# best_sd = max(best_sd, sd)
+						self.states = best_sd
+						ss = (Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
+						seq.append(ss)
+						totalTime += tt
+						if (i < repeat_count and i%self.k == self.k-1):
+							conf_begin_phase = max_conf
 
-				elif flag == 0 and i >= repeat_count:# and i%self.k == self.k-1 
+				elif flag == 0 and i >= repeat_count:# and i%self.k == self.k-1 				
+					print('------ no exploration')
 					sd = sm.frame+1 if sm.frame > 0 else sm.frame  
 					if a == 0:
 						sd = sm.frame 
@@ -278,8 +293,8 @@ class bandit:
 					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
 					seq.append(ss)
 					totalTime += tt
-
-				if i > repeat_count and sm.conf > 2e5 and once == 0:
+					
+				if i > repeat_count and (sm.conf > max(2*conf_begin_phase, 1e5) or critical == 1) and once == 0:
 					if flag == 0 and ocount == 0: #(i+1)%self.k == 0 :
 						flag = 1
 						print('------ Started exploring  once')
