@@ -186,6 +186,7 @@ class bandit:
 		max_conf = 0
 		critical = 0
 		a = 0
+		ecount = 0
 		for i in range(4*self.iters):
 			if int(TIMEOUT - totalTime) <= 0:
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime)
@@ -207,10 +208,12 @@ class bandit:
 					#if sm and sm.to == -1 and count > 2:
 					next_timeout = self.timeout[i-1] * SC
 					if ending : #or self.timeout[i-1] > next_timeout > TIMEOUT - (totalTime + self.timeout[i]):
-						#if count > self.k-1:
-						print('BMC-depth reached ', self.states, 'totalTime', totalTime)
-						print('Stopping iteration - condition with timeout ', next_timeout)
-						break
+						if ecount > self.k-1:
+							print('BMC-depth reached ', self.states, 'totalTime', totalTime)
+							print('Stopping iteration - condition with timeout ', next_timeout)
+							break
+						else:
+							ecount += 1
 						# else:
 						# 	self.timeout[i] = next_timeout #min(self.timeout[i-1] * SC, 480)
 						# 	count = 0
