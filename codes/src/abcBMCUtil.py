@@ -55,7 +55,7 @@ def simplify(fname, ofname):
     out, output =  run_cmd(st)
 
 
-def parse_bmc2(output, t):
+def parse_bmc2(output, t=0):
     ar_tab = OrderedDict()
     sm = None
     xx = r'[ \t]+([\d]+)[ \t]+[:][ \t]+F[ \t]+=[ \t]*([\d]+).[ \t]+O[ \t]+=[ \t]*([\d]+).[ \t]+And[ \t]+=[ \t]*([\d]+).[ \t]+Var[ \t]+=[ \t]*([\d]+).[ \t]+Conf[ \t]+=[ \t]*([\d]+).[ \t]+.*([\d]+)[ \t]+MB[ \t]+([\d]+[.][\d]+)[ \t]+sec'
@@ -64,9 +64,13 @@ def parse_bmc2(output, t):
         print(m)
     xx1 = r'No[ \t]+output[ \t]+failed[ \t]+in[ \t]+([\d]+)[ \t]+frames[.]*'
     m2 = re.finditer(xx1, output, re.M|re.I)
+    frame_count = -1
     for m21 in m2:
         if DEBUG:
             print(m21.group(1)) 
+        frame_count = int(m21.group(1))
+
+    print(frame_count)
     #Output 0 of miter "../benchmark/HWMCC15/6s20_n" was asserted in frame 9
     xx2 = r'Output.+was[ \t]+asserted[ \t]+in[ \t]+frame[ \t]+([\d]+).[.]*'
     m3 = re.finditer(xx2, output, re.M|re.I)
@@ -80,14 +84,23 @@ def parse_bmc2(output, t):
         sm1 = int(m1.group(2)), int(m1.group(5)), int(m1.group(4)), int(m1.group(6)), int(m1.group(7)), float(m1.group(8))
         if DEBUG:
             print(sm1, m1.group(1), m21.group(1), asrt)   
-        if sm1[3] > 0:   
-
+        if sm1[3] > 0 and (frame_count > 0): # and sm1[0] <= frame_count):   
             tt = sm1[5] #if t == 0  else t
-            sm = abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = sm1[4], to=sm1[5] - pretm, asrt=asrt, tt = tt) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
+            to = sm1[5] - pretm
+            sm = abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = sm1[4], to=to, asrt=asrt, tt = tt) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
             if DEBUG:
                 print(sm)
             ar_tab.update({sm.frame:sm})  
         pretm = sm1[5]
+    # remove last one as tt > t
+    # ar_tab1 = {}
+    # if len(ar_tab.keys()) > 0:
+    #     key = sorted(ar_tab.keys(), reverse = True)[0]
+    #     # sm_res = ar_tab[key] 
+    #     for ky in ar_tab.keys():
+    #         if not (ky == key):
+    #             ar_tab1.update({ky:ar_tab[ky]})
+
     if len(ar_tab.keys()) > 0:
         key = sorted(ar_tab.keys(), reverse = True)[0]
         sm_res = ar_tab[key] 
@@ -96,13 +109,22 @@ def parse_bmc2(output, t):
     res =  asrt, sm_res, ar_tab
     return res
 
-def parse_bmc3(output, t, scale = 1):
+def parse_bmc3(output, t=0, scale = 1):
     ar_tab = OrderedDict()
     sm = None
-    xx = r'[ \t]*([\d]+)[ \t]+[+][ \t]+[:][ \t]+Var[ \t]+=[ \t]*([\d]+).[ \t]+Cla[ \t]+=[ \t]*([\d]+).[ \t]+Conf[ \t]+=[ \t]*([\d]+).[ \t]+Learn[ \t]+=[ \t]*([\d]+).[ \t]+.*[\d]+[ \t]+MB[ \t]+([\d]+)[ \t]+MB[ \t]+([\d]+[.][\d]+)[ \t]+sec'
+    xx = r'[ \t]*([\d]+)[ \t]+[+][ \t]+[:][ \t]+Var[ \t]+=[ \t]*([\d]+).[ \t]+Cla[ \t]+=[ \t]*([\d]+).[ \t]+Conf[ \t]+=[ \t]*([\d]+).[ \t]+Learn[ \t]+=[ \t]*([\d]+).[ \t]+.*([\d]+)[ \t]+MB[ \t]+([\d]+)[ \t]+MB[ \t]+([\d]+[.][\d]+)[ \t]+sec'
     m = re.finditer(xx, output, re.M|re.I)
     if DEBUG:
         print(m)
+
+    xx1 = r'No[ \t]+output[ \t]+asserted[ \t]+in[ \t]+([\d]+)[ \t]+frames[.]*'
+    m2 = re.finditer(xx1, output, re.M|re.I)
+    frame_count = -1
+    for m21 in m2:
+        if DEBUG:
+            print(m21.group(1)) 
+        frame_count = int(m21.group(1))
+    print(frame_count)
     #Output 0 of miter "../benchmark/HWMCC15/6s20_n" was asserted in frame 9
     #xx2 = r'Output[.]*was[ \t]+asserted[ \t]+in[ \t]+frame[ \t]+([\d]+).[.]*'
     #xx2 = r'Output[ \t]+([\d]+)[.]+[ \t]+was[ \t]+asserted[ \t]+in[ \t]+frame[ \t]+([\d]+)'
@@ -122,16 +144,23 @@ def parse_bmc3(output, t, scale = 1):
         asrt_del = int(m31.group(2))
     pretm = 0
     for m1 in m:
-        sm1 = int(m1.group(1)), int(m1.group(2)), int(m1.group(3)), int(m1.group(4)), int(m1.group(5)), int(m1.group(6)),float(m1.group(7))
+        sm1 = int(m1.group(1)), int(m1.group(2)), int(m1.group(3)), int(m1.group(4)), int(m1.group(5)), int(m1.group(6)), int(m1.group(7)), float(m1.group(8))
         #tm = float(m1.group(7))
         if DEBUG:
             print(sm1)   
-        tt = sm1[6]*scale #if t == 0  else t
-        sm =  abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = sm1[5],to=sm1[6]-pretm, asrt=asrt, tt=tt) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
-        if DEBUG:
-            print(sm)
-        pretm = sm1[6]
-        ar_tab.update({sm.frame:sm}) 
+        if sm1[2] > 0 or (frame_count > 0): # and sm1[0] <= frame_count):   
+            tt = sm1[7]*scale #if t == 0  else t
+            to = sm1[7] - pretm
+            sm =  abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = max(sm1[5], sm1[6]), to=to, asrt=asrt, tt=tt) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
+            if DEBUG:
+                print(sm)
+            if sm.frame in ar_tab:
+                sm2 = ar_tab[sm.frame]
+                if sm2.to < sm.to:
+                    ar_tab.update({sm.frame:sm}) 
+            else:
+                ar_tab.update({sm.frame:sm}) 
+            pretm = ar_tab[sm.frame].tt
          
     if len(ar_tab.keys()) > 0:
         key = sorted(ar_tab.keys(), reverse = True)[0]
@@ -181,8 +210,9 @@ def pdr(ofname, t):
 def bmc2(ofname, sd, t=0, f=0):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
-    command = "\"read {0}; print_stats; &get; bmc2 -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, (sd-1) if sd > 1 else 0, t, f)
+    command = "\"read {0}; print_stats; &get; bmc2 -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
     st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
+    print(st)
     out, output =  run_cmd(st)
     res = parse_bmc2(output,t)
     return res
@@ -200,7 +230,8 @@ def bmc3rs(ofname, sd, t=0, f=0):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
     command = "\"read {0}; print_stats; &get; bmc3 -s -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
-    st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
+    st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]    
+    print(st)
     out, output =  run_cmd(st)
     res = parse_bmc3(output,t)
     return res
@@ -209,7 +240,8 @@ def bmc3r(ofname, sd, t=0, f=0):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
     command = "\"read {0}; print_stats; &get; bmc3 -r -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
-    st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
+    st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]    
+    print(st)
     out, output =  run_cmd(st)
     res = parse_bmc3(output,t)
     return res
@@ -219,12 +251,18 @@ def bmc3j(ofname, sd, t=0, f=0, j = 2):
     cmdName = os.path.join(pname, "abc")
     command1 = "\"read {0}; print_stats; &get; bmc3  -S {1:5d} -T {2:5d} -F {4} -J {3} -v -L stdout; print_stats\"".format(ofname, sd, int(t/2), j, f)
     #command = "\"read {0}; print_stats; &get; bmc3 -r -C {1:5d} -D {2:5d} -S {3:5d} -T {4:5d} -v -L stdout; print_stats\"".format(ofname, c, d, sd, t,)
-    st1 = ' '.join([cmdName, "-c", command1]) #, "--boound", "20"]
+    st1 = ' '.join([cmdName, "-c", command1]) #, "--boound", "20"]    
+    print(st1)
     out, output1 =  run_cmd(st1)
     command2 = "\"read {0}; print_stats; &get; bmc3  -S {1:5d} -T {2:5d} -F {4} -J {3} -v -L stdout; print_stats\"".format(ofname,  sd+1, int(t/2), j, f)
-    st2 = ' '.join([cmdName, "-c", command2]) #, "--boound", "20"]
+    st2 = ' '.join([cmdName, "-c", command2]) #, "--boound", "20"]    
+    print(st2)
     out, output2 =  run_cmd(st2)
     res = parse_bmc3('\n'.join([output1,output2]),t, 2)
+    asrt, sm_res, ar_tab = res
+    # print('parse result bmc3j')
+    # for ky in ar_tab.keys():
+    #     print('{0},{1}'.format(ky,ar_tab[ky].to))
     #sm =  abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = sm1[5],to=sm1[6]-pretm, asrt=asrt)
     return res
 
@@ -232,7 +270,8 @@ def bmc3rg(ofname, sd, t=0, f=0):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
     command = "\"read {0}; print_stats; &get; bmc3 -g -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t,f)
-    st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
+    st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]    
+    print(st)
     out, output =  run_cmd(st)
     res = parse_bmc3(output,t)
     return res
@@ -241,7 +280,9 @@ def bmc3ru(ofname, sd, t=0, f=0):
     pname = os.path.join(PATH, "ABC")
     cmdName = os.path.join(pname, "abc")
     command = "\"read {0}; print_stats; &get; bmc3 -u -S {1:5d} -T {2:5d} -F {3} -v -L stdout; print_stats\"".format(ofname, sd, t, f)
-    st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
+    st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]    
+    print(st)
     out, output =  run_cmd(st)
     res = parse_bmc3(output,t)
     return res
+
