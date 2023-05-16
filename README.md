@@ -53,6 +53,52 @@ Semiformal verification for bug hunting: "The Art of Semi-Formal Bug Hunting." P
 
 "An effective guidance strategy for abstraction guided simulation." F. M. de Paula, A J. Hu; DAC 2007.
 
+Minutes of Meeting with Jason@IBM on 9th March 2023
+--------------------------------------------------------
+
+(1) we can add another BMC arm: abstraction-based bmc - localize the property and explore with BMC, if the localization is smaller and sufficient for the given depth, this might actually improve the BMC-depth since we are exploring on a smaller state space (with more inputs due to localization).  If the localization is not sufficient, the localization spends more time refining the abstraction. I will need look into the ABC abstraction command, and try to get a complete command for one action. 
+
+(2) We should not kill abc's bmc engine, rather have an option to let bmc to stop after a timeout and continue from the same state, I'm not sure about this in ABC, but we can try to study after our initial BMC selection works in MAB method. However, from our current MAB-BMC - once we can make MAB-BMC better than a standalone BMC, then if the selected bmc sequence has consecutively same bmc engine we can think of starting a fresh bmc action vs continue previous bmc action.
+
+(3) we are currently having bmc-time out as fixed, we can make bmc timeout as dynamic, ie., take an early gate/clause count and decide how much time we need to run BMC to get to a reasonable time for SAT exploration within BMC.
+
+MOM with Sudhakar@TI on 4th May 2023
+-----------------------------------------
+The following are the problems that will help lowering the barrier for FV adoption:
+
+1. Determining the depth of the design for bounded proof based on design and run heuristics
+   The paper (there may be other papers too) discusses how to arrive at this methodically. But, not all are applicable and some may make mistakes in arriving at this.    https://dvcon-proceedings.org/wp-content/uploads/sign-off-with-bounded-formal-verification-proofs.pdf
+
+2. Determining the parameters for the abstractions 
+   E.g., I can have multiple clocks in my design. When I run them all at the same frequency then my design will converge. If I move to their actual ratios then things    will start to time out. I can improve the design FV coverage by reducing the ratio between the clocks. But this has a limit. What is this limit? Can ML find this   
+   based on the design and clock heuristics?
+
+3. If the tool timeouts at a certain depth what is the coverage for simulation. This goes to your Task C on coverage. Difference here is the coverage is not for full   
+   design but for the portions not covered in formal but needs to be covered in simulation
+
+4.Using Regenerative AI to use “English” or any other language to interact with the tools. For e.g.,
+  
+  -- a. my clock is CLK1 and CLK2
+  
+  -- b. CLK2 is 2x CLK1
+  
+  -- c. CLK2 is asynchronous to CLK1
+
+5. Assertion mining based on what the FV engg. has already coded. Usually the FV engg. will have his setup and can you understand the intent from these and mine additional assertions to :
+
+ -- a. get the same functionality but will be easier on the engines. E.g., the following assertion can be written in two way. In Cadence the second one works faster than the first one
+  
+  --- i.  Check_pmode_entry_to_LPWR_pmode_fast : assert property ( @(posedge tb_fv_clk) disable iff( ~DUT_sup_por_n_o)     tb_fv_pm_fsm_stop_lfosc_cond [*160] |=>       
+        tb_fv_pmode_state == PM_WAIT) ;
+    
+  --- ii. Implement a counter (tb_fv_pm_fsm_stop_lfosc_count) that counts tb_fv_pm_fsm_stop_lfosc_cond and modify the highlighted portion of the assertion as below:
+        tb_fv_pm_fsm_stop_lfosc_cond && (tb_fv_pm_fsm_stop_lfosc_count == 160)
+
+ -- b. get better coverage
+
+6. If design has changed use the information from previous design proof to guide faster the new design (Cadence is doing this).
+
+
 Some useful links:
 --------------------
 Link for Latest ABC: https://github.com/berkeley-abc/abc
