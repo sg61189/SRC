@@ -245,16 +245,22 @@ class bandit:
 			if sm and sm.to == -1 and self.timeout[i] >= 120:
 				critical = 1
 
+			if flag == 1 and ocount >= self.k-1: #(i+1)%self.k == self.k-1:
+				flag = 0
+				once = 1
+				#ocount = 0
+				print('----- Stopped exploring once')
+
 			if sm and reward > 0:
-				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(2*conf_begin_phase, 1e5), 'once', once, 'flag', flag, 'iter', (i+1)%self.k)
+				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(2*conf_begin_phase, 1e5), 'ocount', ocount, 'once', once, 'flag', flag, 'iter', (i+1)%self.k)
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
-				if (i < repeat_count ) or (flag == 1) :
+				if (i < repeat_count ) or (flag == 1 and once == 0) :
 					sd = sm.frame+1 if sm.frame > 0 else sm.frame
 					best_sd = max(best_sd, sd)
 					if (i < repeat_count):
 						max_conf = max(max_conf, sm.conf)
 					print('------ exploring')
-					if (i < repeat_count and i%self.k == self.k-1) or (flag == 1 and ocount >= self.k-1) :
+					if (i < repeat_count and i%self.k == self.k-1) or (flag == 1 and once == 0 and ocount >= self.k-1) :
 						# if flag == 1:
 						# 	print('------ Stopped exploring beginning')
 						# elif i < 2*self.k:
@@ -297,11 +303,6 @@ class bandit:
 				ss = (Actions[a], -1, reward, -1, self.timeout[i],self.states)
 
 
-			if flag == 1 and ocount >= self.k-1: #(i+1)%self.k == self.k-1:
-				flag = 0
-				once = 1
-				#ocount = 0
-				print('----- Stopped exploring once')
 			# fragmentation
 			# tt = sm.tt #if sm.asrt > 0  else self.timeout[i]
 		
