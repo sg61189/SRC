@@ -268,7 +268,7 @@ class bandit:
 					if (i < repeat_count):
 						max_conf = max(max_conf, sm.conf)
 					print('------ exploring')
-					if (i < repeat_count and i%self.k == self.k-1) or (flag == 1 and ocount == self.k-1) :
+					if (i < repeat_count and i%self.k == self.k-1) or (flag == 1 and ocount >= self.k-1) :
 						# if flag == 1:
 						# 	print('------ Stopped exploring beginning')
 						# elif i < 2*self.k:
@@ -293,14 +293,10 @@ class bandit:
 					totalTime += tt
 					
 				if i > repeat_count and (sm.conf > max(2*conf_begin_phase, 1e5) or critical == 1) and once == 0:
+					print('Decide to explore or not ---', flag, ocount, once)
 					if flag == 0 and ocount == 0: #(i+1)%self.k == 0 :
 						flag = 1
 						print('------ Started exploring  once')
-					if flag == 1 and ocount == self.k-1: #(i+1)%self.k == self.k-1:
-						flag = 0
-						once = 1
-						#ocount = 0
-						print('----- Stopped exploring once')
 
 				# if i > 2*self.k and sm.conf > 6e5 and once == 1 and twice == 0:
 				# 	if flag == 0 and (i+1)%self.k == 0 :
@@ -313,6 +309,12 @@ class bandit:
 			else:
 				ss = (Actions[a], -1, reward, -1, self.timeout[i], self.states)
 			
+			if flag == 1 and ocount >= self.k-1: #(i+1)%self.k == self.k-1:
+				flag = 0
+				once = 1
+				#ocount = 0
+				print('----- Stopped exploring once')
+				
 			self.reward[i] = self.mean_reward
 
 			# if sm and sm.to > 0 and reward > 0:
