@@ -210,6 +210,7 @@ class bandit:
 
 					if sm and sm.to == -1 and count > 2:
 						next_timeout = self.timeout[i-1] * SC
+						self.timeout[i] = next_timeout
 						if self.timeout[i] >= 120:
 							critical = 1
 						if ending :
@@ -220,7 +221,7 @@ class bandit:
 							else:
 								ecount += 1
 						else:
-							self.timeout[i] = next_timeout #min(self.timeout[i-1] * SC, 480)
+							# self.timeout[i] = next_timeout #min(self.timeout[i-1] * SC, 480)
 							count = 0
 					else:
 						self.timeout[i] = self.timeout[i-1]

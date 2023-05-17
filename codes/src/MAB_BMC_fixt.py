@@ -207,6 +207,7 @@ class bandit:
 					# self.timeout[i] = (self.timeout[i-1] * SC)#,  TIMEOUT - totalTime)#, 480)
 					#if sm and sm.to == -1 and count > 2:
 					next_timeout = self.timeout[i-1] * SC
+					self.timeout[i] = next_timeout
 					if ending : #or self.timeout[i-1] > next_timeout > TIMEOUT - (totalTime + self.timeout[i]):
 						if ecount > self.k-1:
 							print('BMC-depth reached ', self.states, 'totalTime', totalTime)
@@ -215,10 +216,10 @@ class bandit:
 						else:
 							ecount += 1
 						# else:
-						# 	self.timeout[i] = next_timeout #min(self.timeout[i-1] * SC, 480)
+						 #min(self.timeout[i-1] * SC, 480)
 						# 	count = 0
-					else:
-						self.timeout[i] = next_timeout #min(self.timeout[i-1] * SC, 480)
+					# else:
+					# 	self.timeout[i] = next_timeout #min(self.timeout[i-1] * SC, 480)
 						# count = 0
 					# else:
 					# 	self.timeout[i] = self.timeout[i-1]
