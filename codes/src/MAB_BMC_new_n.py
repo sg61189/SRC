@@ -225,6 +225,11 @@ class bandit:
 							if not enter_critical and i > repeat_count:: #count > 3:
 								critical = True
 								print('blocker -- critical phase')
+							else:
+								if i < repeat_count and count > int(M/2):
+									critical = True
+									print('blocker -- critical phase')
+
 						else:
 							self.timeout[i] = self.timeout[i-1]
 							count = count + 1
