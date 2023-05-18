@@ -15,7 +15,7 @@ DEBUG = True
 DEBUG = False
 OPT = True
 T = 60 
-TIMEOUT = 3600 #/2.0
+TIMEOUT = 3600
 SC = 2
 DIFF = 1 # BMC depth absolute
 DIFF = 0 # BMC depth relative
@@ -441,7 +441,7 @@ class eps_bandit(bandit):
 			self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) * self.alpha
 
 		# if a >0:
-		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, ', '.join([rk for rk in self.k_reward])))
+		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, [rk for rk in self.k_reward]))
 		return a, reward, sm, ar_tab
 		
    
@@ -506,7 +506,7 @@ class eps_decay_bandit(bandit):
 			self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) * self.alpha
 
 		# if a >0:
-		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, ', '.join([rk for rk in self.k_reward])))
+		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, [rk for rk in self.k_reward]))
 		return a, reward, sm, ar_tab
 	   
 class ucb1_bandit(bandit):
@@ -556,7 +556,7 @@ class ucb1_bandit(bandit):
 		
 		self.k_ucb_reward = self.k_reward + self.c * np.sqrt((np.log(self.n)) / self.k_n)
 
-		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, ', '.join([rk for rk in self.k_ucb_reward])))
+		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, [rk for rk in self.k_ucb_reward]))
 
 		return a, reward, sm, ar_tab
 	
