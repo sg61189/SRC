@@ -7,9 +7,9 @@ while read line; do
 echo "----------------- ${i} Running file ${line} ------------------"
 fn=${line}
 echo "----------------- Running MAB_bmc_fixed time ------------------"
-python3 MAB_BMC_fixt.py -i benchmark/HWMCC_15_17/${fn}.aig > logs/log_mabmc_fixt_${fn}_D3.txt
+python3 MAB_BMC_fixt_n.py -i benchmark/HWMCC_15_17/${fn}.aig > logs/log_mabmc_fix_n_${fn}_D3.txt
 echo "----------------- Running MAB_bmc_new ------------------"
-python3 MAB_BMC_new.py -i benchmark/HWMCC_15_17/${fn}.aig > logs/log_mabmc_new_${fn}_D3.txt
+python3 MAB_BMC_new_n.py -i benchmark/HWMCC_15_17/${fn}.aig > logs/log_mabmc_n_${fn}_D3.txt
 #echo "----------------- Running MAB_bmc_frame ------------------"
 #python3 MAB_BMC_fo.py -i benchmark/HWMCC_15_17/${fn}.aig > logs/log_mabmc_fo_${fn}_D3.txt
 echo "----------------- Running Superdeep ------------------"
