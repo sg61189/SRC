@@ -126,3 +126,19 @@ Codebase: https://ycunxi.github.io/cunxiyu/
 Talk: https://www.youtube.com/watch?v=EPcn5ttp1TM
 
 
+Steps to install ABC is as follows:
+----------------------------------------------
+
+Download the zip from here: https://github.com/berkeley-abc/abc and unzip.
+$> cd abc-master
+$> make
+$> abc
+
+Once ABC is installed, the last command should open the ABC command prompt.  We can read the aig files and generate the corresponding verilog files as follows:
+
+abc 01> read 6s7.aig; write_verilog 6s7.v
+
+The same commands can also be executed from bash script as follows:
+
+$> abc -c "read 6s7.aig; write_verilog 6s7.v"
+
