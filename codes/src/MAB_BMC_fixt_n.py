@@ -15,7 +15,7 @@ DEBUG = True
 DEBUG = False
 OPT = True
 T = 60 
-TIMEOUT = 3600
+TIMEOUT = 3600 #/2.0
 SC = 2
 DIFF = 1 # BMC depth absolute
 DIFF = 0 # BMC depth relative
@@ -25,11 +25,11 @@ DIFF = 3 # function number of frames/time diff
 FIXED = False
 FIXED = True
 PDR = False
-MAX_FRAME = 1000
+MAX_FRAME = 1e9
 MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 MAX_MEM = 2000
-F = 2
+F = 3
 
 time_outs = {}
 Actions = ['bmc2', 'bmc3', 'bmc3rs', 'bmc3j', 'bmc3rg', 'bmcru', 'bmc3r', 'pdr']
@@ -42,6 +42,8 @@ while tot < TIMEOUT:
 	tot += st
 	st = min(st*SC,  TIMEOUT - tot)
 	Iters += 1
+
+M = int(len(Actions))
 
 class bandit:
 
@@ -121,6 +123,11 @@ class bandit:
 		elif a == 7: #ABC pdr
 			asrt, sm, ar_tab = pdr(ofname, t)
 		
+		# min_t = MAX_TIME
+		# if len(ar_tab.keys()) > 0:
+        # 	min_k = sorted(ar_tab.keys())[0]
+        # 	min_t =  ar_tab[min_k].to
+
 		ar_tab_old = self.engine_res[a]
 		for ky in ar_tab.keys():
 			ar_tab_old.update({ky:ar_tab[ky]})
@@ -190,6 +197,7 @@ class bandit:
 		ending = 0
 		conf_begin_phase = 0
 		max_conf = 0
+		explore_count = 0
 
 		a = 0
 		ecount = 0
@@ -218,7 +226,7 @@ class bandit:
 			else:
 				if i > 1 and enter_critical:	
 					a = i%(self.k)
-					print('exploring select', a)
+					print('critical exploring select', a)
 					self.timeout[i] = self.timeout[i-1]
 					ocount += 1
 				else:
@@ -254,13 +262,15 @@ class bandit:
 
 			a, reward, sm, ar_tab = self.update_policy(a, self.timeout[i])
 
-			tt =  sm.tt if sm.asrt > 0  else math.ceil(sm.tt) #self.timeout[i]
+			# fragmentation
+			tt = sm.tt if sm.asrt > 0  else math.ceil(sm.tt) # self.timeout[i]
 
 			all_time += self.timeout[i]
 
 			if sm and sm.to == -1:# and self.timeout[i] >= 120:
-				# if a == 3: #not enter_critical: #count > 3:
-				critical = True # blocker 
+				if not enter_critical and i > repeat_count:
+					critical = True # blocker 
+					print('blocker -- critical phase')
 				# else:
 				# 	count += 1
 			else:
@@ -268,14 +278,16 @@ class bandit:
 
 			if sm and reward > 0:
 				count = 0
-				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k)
+				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k, 'repeat_count', repeat_count, 'M', M)
 
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
 				if len(best) == 0:
 					best = ss
 
-				if i > repeat_count and (sm.conf > max(F*conf_begin_phase, 1e5)):
-					critical = True # clauses incresed
+				if i > repeat_count and (sm.cla > max(F*conf_begin_phase, 1e5)):
+					if not enter_critical:
+						critical = True # clauses incresed
+						print('clauses incresed -- critical phase')
 
 				if (i < repeat_count ) or (enter_critical)  : # exploration
 					sd = sm.frame+1 if sm.frame > 0 else sm.frame
@@ -284,10 +296,10 @@ class bandit:
 						best = ss
 					#best_sd = max(best_sd, sd)
 					# if (i < repeat_count):
-					max_conf = max(max_conf, sm.conf)
+					max_conf = max(max_conf, sm.cla)
 
-					print('------ exploring --', i, 'critical', critical)
-					if (i < repeat_count and i%self.k == self.k-1) or (enter_critical and ocount >= self.k-1) or (i < repeat_count and sm.asrt > 0):
+					print('------ exploring --', i, 'critical', critical, 'best_sd', best_sd, 'max_conf', max_conf)
+					if (i < repeat_count and i%self.k == self.k-1) or (enter_critical and ocount >= M-1) or (i < repeat_count and sm.asrt > 0) or (enter_critical and sm.asrt > 0):
 						# end of exploration --- pick the best one
 						print('------ at the end of exploration')
 						# sd = sm.frame+1 if sm.frame > 0 else sm.frame
@@ -313,13 +325,14 @@ class bandit:
 				ss = (Actions[a], -1, reward, -1, self.timeout[i],self.states)
 
 
-			if critical and not enter_critical:
+			if critical and not enter_critical and i > repeat_count:
 				enter_critical = True
 				exit_critical = False
 				ocount = 0
-				print('----- Started exploring --', i, ocount)
+				explore_count += 1
+				print('----- Started exploring --', i, ocount, 'explore_count', explore_count)
 
-			if enter_critical and ocount >= self.k-1: #(i+1)%self.k == self.k-1:
+			if enter_critical and (ocount >= M-1): #(i+1)%self.k == self.k-1:
 				enter_critical = False
 				exit_critical = True
 				critical = False
