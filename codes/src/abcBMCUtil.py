@@ -41,7 +41,7 @@ def run_cmd(command):
     '''This will give you the output of the command being executed'''
     if DEBUG:
         print ("\t----- Output: " + str(out)) #,  'out', output)       
-    print('\t', command) 
+    # print('\t', command) 
     print('\t', output)
 
     sys.stdout.flush()
