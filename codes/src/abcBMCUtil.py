@@ -84,7 +84,7 @@ def parse_bmc2(output, t=0):
         sm1 = int(m1.group(2)), int(m1.group(5)), int(m1.group(4)), int(m1.group(6)), int(m1.group(7)), float(m1.group(8))
         if DEBUG:
             print(sm1, m1.group(1), m21.group(1), asrt)   
-        if sm1[3] > 0 and (frame_count > 0): # and sm1[0] <= frame_count):   
+        if sm1[3] > 0 and (asrt > 0 or frame_count > 0): # and sm1[0] <= frame_count):   
             tt = sm1[5] #if t == 0  else t
             to = sm1[5] - pretm
             sm = abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = sm1[4], to=to, asrt=asrt, tt = tt) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])

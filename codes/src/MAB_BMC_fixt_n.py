@@ -287,7 +287,7 @@ class bandit:
 					max_conf = max(max_conf, sm.conf)
 
 					print('------ exploring --', i, 'critical', critical)
-					if (i < repeat_count and i%self.k == self.k-1) or (enter_critical and ocount >= self.k-1) :
+					if (i < repeat_count and i%self.k == self.k-1) or (enter_critical and ocount >= self.k-1) or (i < repeat_count and sm.asrt > 0):
 						# end of exploration --- pick the best one
 						print('------ at the end of exploration')
 						# sd = sm.frame+1 if sm.frame > 0 else sm.frame
