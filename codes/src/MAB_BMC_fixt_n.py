@@ -232,8 +232,8 @@ class bandit:
 				else:
 					a = self.pull(a, count)
 					# self.timeout[i] = (self.timeout[i-1] * SC)#,  TIMEOUT - totalTime)#, 480)
-					if sm and sm.to == -1 and count > int(M/2):
-						next_timeout = self.timeout[i-1] * SC
+					#if sm and sm.to == -1 and count > int(M/2):
+					next_timeout = self.timeout[i-1] * SC
 					self.timeout[i] = next_timeout
 					if ending : #or self.timeout[i-1] > next_timeout > TIMEOUT - (totalTime + self.timeout[i]):
 						if ecount > self.k-1:
