@@ -254,7 +254,7 @@ class bandit:
 
 			a, reward, sm, ar_tab = self.update_policy(a, self.timeout[i])
 
-			tt = math.ceil(sm.tt) #if sm.asrt > 0  else self.timeout[i]
+			tt =  sm.tt if sm.asrt > 0  else math.ceil(sm.tt) #self.timeout[i]
 
 			all_time += self.timeout[i]
 
