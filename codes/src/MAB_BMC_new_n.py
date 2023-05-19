@@ -183,6 +183,7 @@ class bandit:
 		max_conf = 0
 		a = 0
 		self.explore = False
+		explore_count = 0
 
 		end_frame = ()
 
