@@ -120,6 +120,7 @@ class bandit:
 
 		self.engine_res[a] = ar_tab_old
 
+
 		if sm is not None:
 			# print(sm)
 			reward = 0
@@ -137,11 +138,15 @@ class bandit:
 			else:
 				#reward = sm.cla/(10000 * sm.to) if sm.to > 0 else sm.to
 
+				c1 = 1.0/MAX_MEM
+				c2 = 1.0/MAX_TIME
 				pen = t - sm.tt
 				reward = 0
 				cn = 0
 				for ky in ar_tab_old.keys():
 					tm = ar_tab_old[ky].to
+					mem = ar_tab_old[ky].mem
+					#reward += 2*np.exp(-c1*mem/(1+ky) - c2*tm/(1+ky))  
 					reward += 2*np.exp(-1*tm/(1+ky))
 					cn += 1
 				reward = (reward)/cn #(reward + np.exp(-pen/MAX_TIME))/cn
@@ -150,7 +155,7 @@ class bandit:
 			if asrt > 0:
 				reward = asrt
 			else:
-				reward = -0.5 * np.exp(t/MAX_TIME) #np.log(t)
+				reward = -1 * np.exp(t/MAX_TIME) #np.log(t)
 		print(reward, sm)
 
 		return reward, sm, ar_tab_old
@@ -601,7 +606,7 @@ def main(argv):
 	#iters = int(np.log((TIMEOUT/T)*(SC-1) +1)/(np.log(SC))) + 1 # time-steps
 	episodes = 1 #episodes
 	print('iters', iters)
-	alpha = 0.05
+	alpha = 0.6
 	reward = 0
 	# Initialize bandits
 	eps_0 = eps_bandit(k, 0.0, iters,1, reward, inputfile)
@@ -632,7 +637,7 @@ def main(argv):
 	# labels = [ r'$\epsilon=0.4$', r'$\epsilon=0.1, \alpha = {0}$'.format(alpha), r'$\epsilon-decay$', 'ucb1', r'opt $\epsilon=0.01$' ]
 
 	options = [eps_high_alpha, ucb1]
-	labels = [r'$\epsilon= 0.0, \alpha = {0}$'.format(alpha), 'ucb1']
+	labels = [r'$erwa$'.format(alpha), 'ucb1']
 
 
 	pp = PdfPages("plots/plot_MAB_BMC_N_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
