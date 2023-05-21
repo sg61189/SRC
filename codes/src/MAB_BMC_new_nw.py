@@ -189,25 +189,23 @@ class bandit:
 		a = 0
 		self.explore = False
 		explore_count = 0
-		all_ending = False
 
 		end_frame = ()
 
 		for i in range(self.iters):
-			if all_ending:		
-				end_frame = self.states, asrt, totalTime, seq		
-				print('BMC-depth reached ', self.states, 'totalTime', totalTime, 'all_time', all_time)
-				print('Stopping iteration -- all timeout')
-				break
 
+			print('Iteration {0} start ------'.format(i))
 			if int(TIMEOUT - totalTime) <= 0:
 				end_frame = self.states, asrt, totalTime, seq
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime)
 				print('Stopping iteration -- seq timeout')
 				break
 
-			print('Iteration {0} start ------'.format(i))
-
+			if int(3.5*TIMEOUT - all_time) <= 0:		
+				end_frame = self.states, asrt, totalTime, seq		
+				print('BMC-depth reached ', self.states, 'totalTime', totalTime, 'all_time', all_time)
+				print('Stopping iteration -- all timeout')
+				break
 
 			a = self.pull(a, count)
 			if i < repeat_count or enter_critical:
@@ -268,17 +266,6 @@ class bandit:
 			else:
 				self.timeout[i] = min(self.timeout[i], TIMEOUT - totalTime)
 
-
-			if int(3.0*TIMEOUT - all_time) <= 0:		
-				a = self.pull(a, count=2)
-				self.timeout[i] = min(TIMEOUT, TIMEOUT - totalTime)
-				print('More than {0} hrs spent in learning --- closing iterations now'.format(3.0))
-				all_ending = True
-				enter_critical = False
-				exit_critical = True
-				ocount = 0
-				#break
-
 			print('Next time out', TIMEOUT, self.timeout[i], 'for chosen action', a, Actions[a], 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'ending', ending)
 
 			if self.timeout[i] < 1.0:
@@ -302,7 +289,7 @@ class bandit:
 				if len(best) == 0:
 					best = ss
 
-				if (not all_ending) and i > repeat_count and (sm.cla > max(F*conf_begin_phase, 1e5)):
+				if i > repeat_count and (sm.cla > max(F*conf_begin_phase, 1e5)):
 					if not enter_critical:
 						critical = True # clauses incresed
 						print('clauses incresed -- critical phase')
