@@ -288,7 +288,7 @@ class bandit:
 				if MAX_mem < sm.mem :
 					MAX_mem = sm.mem
 			# fragmentation
-			tt = self.timeout[i] #sm.tt if sm.asrt > 0  else math.ceil(sm.tt) # self.timeout[i]
+			tt = sm.tt if sm.asrt > 0 else self.timeout[i] #sm.tt if sm.asrt > 0  else math.ceil(sm.tt) # self.timeout[i]
 
 			all_time += self.timeout[i]
 
