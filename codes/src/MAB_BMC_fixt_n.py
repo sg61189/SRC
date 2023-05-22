@@ -309,7 +309,11 @@ class bandit:
 				count = 0
 				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k, 'repeat_count', repeat_count, 'M', M)
 
-				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
+				sd = sm.frame+1 if sm.frame > 0 else sm.frame
+				if a == 0:
+					sd = sm.frame 
+				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
+
 				if len(best) == 0:
 					best = ss
 
@@ -348,12 +352,12 @@ class bandit:
 					if a == 0:
 						sd = sm.frame 
 					self.states = sd
-					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
+					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 					seq.append(ss)
 					totalTime += tt
 
 			else:
-				ss = (Actions[a], -1, reward, -1, self.timeout[i],self.states)
+				ss = (Actions[a], -1, reward, -1, self.timeout[i], sd)
 
 
 			if critical and not enter_critical and i > repeat_count:
