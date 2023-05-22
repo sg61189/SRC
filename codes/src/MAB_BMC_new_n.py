@@ -192,16 +192,16 @@ class bandit:
 		all_ending = False
 
 		end_frame = ()
-
+		MAX_mem = 0
 		for i in range(self.iters):
 			if all_ending:		
-				end_frame = self.states, asrt, totalTime, seq		
+				end_frame = self.states, asrt, totalTime, seq, MAX_mem	
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime, 'all_time', all_time)
 				print('Stopping iteration -- all timeout')
 				break
 
 			if int(TIMEOUT - totalTime) <= 0:
-				end_frame = self.states, asrt, totalTime, seq
+				end_frame = self.states, asrt, totalTime, seq, MAX_mem
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime)
 				print('Stopping iteration -- seq timeout')
 				break
@@ -246,7 +246,7 @@ class bandit:
 
 						if ending :
 							if ecount > self.k-1:
-								end_frame = self.states, asrt, totalTime, seq
+								end_frame = self.states, asrt, totalTime, seq, MAX_mem
 								print('BMC-depth reached ', self.states, 'totalTime', totalTime)
 								print('ending -- Stopping iteration - condition with timeout ', next_timeout)
 								break
@@ -282,15 +282,18 @@ class bandit:
 			print('Next time out', TIMEOUT, self.timeout[i], 'for chosen action', a, Actions[a], 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'ending', ending)
 
 			if self.timeout[i] < 1.0:
-				end_frame = self.states, asrt, totalTime, seq
+				end_frame = self.states, asrt, totalTime, seq, MAX_mem
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime)
 				print('Stopping iteration - condition with timeout < ', 1.0)
 				break
 
 			a, reward, sm, ar_tab = self.update_policy(a, self.timeout[i])
 
+			if sm:
+				if MAX_mem < sm.mem:
+					MAX_mem = sm.mem
 			# fragmentation
-			tt = sm.tt if sm.asrt > 0  else math.ceil(sm.tt) # self.timeout[i]
+			tt = self.timeout[i] #sm.tt if sm.asrt > 0  else math.ceil(sm.tt) # self.timeout[i]
 
 			all_time += self.timeout[i]
 			
@@ -309,6 +312,8 @@ class bandit:
 
 				if (i < repeat_count ) or (enter_critical)  : # exploration
 					sd = sm.frame+1 if sm.frame > 0 else sm.frame
+					if a == 0:
+						sd = sm.frame 
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
@@ -367,7 +372,7 @@ class bandit:
 			# self.timeout[i] = T
 			if sm and sm.asrt > 0:
 				asrt = sm.asrt
-				end_frame = self.states, asrt, totalTime, seq
+				end_frame = self.states, asrt, totalTime, seq, MAX_mem
 				print('Output asserted at frame ', sm.asrt, 'tt', tt, 'totalTime', totalTime)
 				print('Stopping iteration -- assert')
 				break
@@ -608,7 +613,7 @@ def main(argv):
 
 	fname = (inputfile.split('/')[-1]).split('.')[0]
 	print(fname)
-	filename = "plots/MAB_BMC_results_new_{0}_{1}.csv".format(TIMEOUT, fname)
+	filename = "plots_IF/MAB_BMC_results_n_IF_{0}_{1}.csv".format(TIMEOUT, fname)
 	# header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
 	# writing to csv file 
 	with open(filename, 'w+') as csvfile: 
@@ -653,7 +658,7 @@ def main(argv):
 	labels = [r'$erwa$'.format(alpha), 'ucb1']
 
 
-	pp = PdfPages("plots/plot_MAB_BMC_N_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
+	pp = PdfPages("plots_IF/plot_MAB_BMC_N_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
 	j = 0
 	all_rewards = []
 	all_selection = []
@@ -715,9 +720,9 @@ def main(argv):
 	all_plots = []
 	fig2 = plt.figure()
 	for j in range(len(options)):
-		d, a, t, seq = all_results[j]
-		print('{0}: \t {1} ({4}) \t time: {2:0.2f} s, real: {5:0.2f}s, Memory: {6:0.2f}MB,{7:0.2f}MB \t {3}'.format(labels[j], a if a > 0 else d, t, seq, 'assert' if a>0 else '', all_times[j][0], all_times[j][1], all_times[j][2]))
-		rows.append([labels[j], a if a > 0 else d, 'sat' if a>0 else 'timeout', '{0:0.2f}'.format(t), '{0:0.2f}'.format(all_times[j][0]), '{0:0.2f}'.format(all_times[j][1]), '{0:0.2f}'.format(all_times[j][2]), seq])
+		d, a, t, seq, mem = all_results[j]
+		print('{0}: \t {1} ({4}) \t time: {2:0.2f} s, real: {5:0.2f}s, Memory: {6:0.2f}MB,{7:0.2f}MB {8}MB \t {3} '.format(labels[j], a if a > 0 else d, t, seq, 'assert' if a>0 else '', all_times[j][0], all_times[j][1], all_times[j][2]. mem))
+		rows.append([fname, labels[j], a if a > 0 else d, 'sat' if a>0 else 'timeout', '{0:0.2f}'.format(t), '{0:0.2f}'.format(all_times[j][0]), '{0:0.2f}'.format(all_times[j][1]), mem, '{0:0.2f}'.format(all_times[j][2]), seq])
 
 		plt.plot(all_rewards[j], label=labels[j])
 		plt.legend(bbox_to_anchor=(1.3, 0.5))
