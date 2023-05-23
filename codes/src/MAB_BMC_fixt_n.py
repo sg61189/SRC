@@ -107,21 +107,21 @@ class bandit:
 		asrt = -1
 		ar_tab = {}
 		if a == 0:    #ABC bmc2
-			asrt, sm, ar_tab = bmc2(ofname, sd, t=t)
+			asrt, sm, ar_tab, tt1 = bmc2(ofname, sd, t=t)
 		elif a == 1: #ABC bmc3
-			asrt, sm, ar_tab = bmc3(ofname, sd, t=t)
+			asrt, sm, ar_tab, tt1 = bmc3(ofname, sd, t=t)
 		elif a == 2: #ABC bmc3rs
-			asrt, sm, ar_tab = bmc3rs(ofname, sd, t=t)
+			asrt, sm, ar_tab, tt1 = bmc3rs(ofname, sd, t=t)
 		elif a == 3: #ABC bmc3j
-			asrt, sm, ar_tab = bmc3j(ofname, sd, t=t)
+			asrt, sm, ar_tab, tt1 = bmc3j(ofname, sd, t=t)
 		elif a == 4: #ABC bmc3g
-			asrt, sm, ar_tab = bmc3rg(ofname, sd, t=t)
+			asrt, sm, ar_tab, tt1 = bmc3rg(ofname, sd, t=t)
 		elif a == 5: #ABC bmc3u
-			asrt, sm, ar_tab = bmc3ru(ofname, sd, t=t)
+			asrt, sm, ar_tab, tt1 = bmc3ru(ofname, sd, t=t)
 		elif a == 6: #ABC bmc3r
-			asrt, sm, ar_tab = bmc3r(ofname, sd, t=t)
+			asrt, sm, ar_tab, tt1 = bmc3r(ofname, sd, t=t)
 		elif a == 7: #ABC pdr
-			asrt, sm, ar_tab = pdr(ofname, t)
+			asrt, sm, ar_tab, tt1 = pdr(ofname, t)
 		
 		# min_t = MAX_TIME
 		# if len(ar_tab.keys()) > 0:
@@ -165,7 +165,7 @@ class bandit:
 						MAX_mem = mem
 				reward = (reward)/cn #(reward + np.exp(-pen/MAX_TIME))/cn
 		else:
-			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = t)
+			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1)
 			if asrt > 0:
 				reward = asrt
 			else:
@@ -266,13 +266,15 @@ class bandit:
 			
 			if int(3.0*TIMEOUT - all_time) <= 0:		
 				a = self.pull(a, count=2)
-				self.timeout[i] = min(TIMEOUT, TIMEOUT - totalTime)
+				self.timeout[i] = min(0.9*TIMEOUT, TIMEOUT - totalTime)
 				print('More than {0} hrs spent in learning --- closing iterations now'.format(3.0))
 				all_ending = True
 				enter_critical = False
 				exit_critical = True
 				ocount = 0
 				#break
+				# if self.timeout[i] > 3000:
+				# 	self.stt
 
 			print('Next time out', self.timeout[i], 'for chosen action', a, Actions[a], 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'ending', ending)
 
@@ -290,9 +292,9 @@ class bandit:
 			# fragmentation
 			tt = sm.tt if sm.asrt > 0 else self.timeout[i] #sm.tt if sm.asrt > 0  else math.ceil(sm.tt) # self.timeout[i]
 
-			all_time += self.timeout[i]
+			all_time += tt
 
-			if sm and sm.to == -1:# and self.timeout[i] >= 120:
+			if not all_ending and sm and sm.to == -1:# and self.timeout[i] >= 120:
 				if not enter_critical and i > repeat_count:
 					critical = True # blocker 
 					print('blocker -- critical phase')
@@ -304,7 +306,7 @@ class bandit:
 							print('blocker -- critical phase')
 			else:
 				count = 0
-			
+
 			sd = self.states
 			if sm and reward > 0:
 				count = 0
@@ -347,7 +349,7 @@ class bandit:
 						# if (i < repeat_count and i%self.k == self.k-1):
 						conf_begin_phase = max_conf
 
-				elif exit_critical and not enter_critical and i >= repeat_count: # exploitation 				
+				elif all_ending or (exit_critical and not enter_critical and i >= repeat_count): # exploitation 				
 					print('------ no exploration')
 					sd = sm.frame+1 if sm.frame > 0 else sm.frame  
 					if a == 0:
@@ -359,6 +361,8 @@ class bandit:
 
 			else:
 				ss = (Actions[a], -1, reward, -1, self.timeout[i], sd)
+				if all_ending:
+					totalTime += tt
 
 
 			if critical and not enter_critical and i > repeat_count:

@@ -80,8 +80,10 @@ def parse_bmc2(output, t=0):
             print(m31.group(1)) 
         asrt = int(m31.group(1))
     pretm = 0
+    tt1 = 0
     for m1 in m:
         sm1 = int(m1.group(2)), int(m1.group(5)), int(m1.group(4)), int(m1.group(6)), int(m1.group(7)), float(m1.group(8))
+        tt1 = sm1[5] 
         if DEBUG:
             print(sm1, m1.group(1), m21.group(1), asrt)   
         if sm1[3] > 0 and ( asrt > 0 or frame_count > 0): # and sm1[0] <= frame_count):   
@@ -106,7 +108,7 @@ def parse_bmc2(output, t=0):
         sm_res = ar_tab[key] 
     else:
         sm_res = sm
-    res =  asrt, sm_res, ar_tab
+    res =  asrt, sm_res, ar_tab, tt1
     return res
 
 def parse_bmc3(output, t=0, scale = 1):
@@ -144,9 +146,11 @@ def parse_bmc3(output, t=0, scale = 1):
             print(m31.group(2)) 
         asrt_del = int(m31.group(2))
     pretm = 0
+    tt1 = 0
     for m1 in m:
         sm1 = int(m1.group(1)), int(m1.group(2)), int(m1.group(3)), int(m1.group(4)), int(m1.group(5)), int(m1.group(6)), int(m1.group(7)), float(m1.group(8))
         #tm = float(m1.group(7))
+        tt1 = sm1[7]*scale
         if DEBUG:
             print(sm1)   
         if sm1[2] > 0 or (frame_count > 0): # and sm1[0] <= frame_count):   
@@ -172,7 +176,7 @@ def parse_bmc3(output, t=0, scale = 1):
         sm_res =  abc_result(frame=sm1.frame, var=sm1.var, cla=sm1.cla, conf = sm1.conf, mem = sm1.mem, to=sm1.to, asrt=asrt, tt= sm1.tt)
     else:
         sm_res = sm
-    res =  asrt, sm_res, ar_tab
+    res =  asrt, sm_res, ar_tab, tt1
     return res
 
 def pdr(ofname, t):
@@ -261,7 +265,7 @@ def bmc3j(ofname, sd, t=0, f=0, j = 2):
     print(st2)
     out, output2 =  run_cmd(st2)
     res = parse_bmc3('\n'.join([output1,output2]),t, 2)
-    asrt, sm_res, ar_tab = res
+    # asrt, sm_res, ar_tab = res
     # print('parse result bmc3j')
     # for ky in ar_tab.keys():
     #     print('{0},{1}'.format(ky,ar_tab[ky].to))
