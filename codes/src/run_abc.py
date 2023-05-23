@@ -25,7 +25,7 @@ MAX_FRAME = 1e4
 MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 MAX_MEM = 4000
-TIMEOUT = 1800
+TIMEOUT = 3600
 
 ST1 = 120
 ST2 = 300
@@ -66,21 +66,21 @@ def runseq(fname, seq):
 	for item in seq:
 		a, t = item
 		if a == 0:    #ABC bmc2
-			asrt, sm, ar_tab1 = bmc2(ofname, sd, t)
+			asrt, sm, ar_tab1, tt1 = bmc2(ofname, sd, t)
 		elif a == 1: #ABC bmc3
-			asrt, sm, ar_tab1 = bmc3(ofname, sd, t)
+			asrt, sm, ar_tab1, tt1 = bmc3(ofname, sd, t)
 		elif a == 2: #ABC bmc3s
-			asrt, sm, ar_tab1 = bmc3rs(ofname, sd, t)
+			asrt, sm, ar_tab1, tt1 = bmc3rs(ofname, sd, t)
 		elif a == 3: #ABC bmc3g
-			asrt, sm, ar_tab1 = bmc3rg(ofname, sd, t)
+			asrt, sm, ar_tab1, tt1 = bmc3rg(ofname, sd, t)
 		elif a == 4: #ABC bmc3r
-			asrt, sm, ar_tab1 = bmc3r(ofname, sd, t)
+			asrt, sm, ar_tab1, tt1 = bmc3r(ofname, sd, t)
 		elif a == 5: #ABC bmc3u
-			asrt, sm, ar_tab1 = bmc3ru(ofname, sd, t)
+			asrt, sm, ar_tab1, tt1 = bmc3ru(ofname, sd, t)
 		elif a == 6: #ABC bmc3j
-			asrt, sm, ar_tab1 = bmc3j(ofname, sd, t)
+			asrt, sm, ar_tab1, tt1 = bmc3j(ofname, sd, t)
 		elif a == 7: #ABC pdr
-			asrt, sm, ar_tab1 = pdr(ofname, t)
+			asrt, sm, ar_tab1, tt1 = pdr(ofname, t)
 
 		for ky in ar_tab1:
 			ar_tab.update({ky: ar_tab1[ky]})
@@ -90,7 +90,7 @@ def runseq(fname, seq):
 			if a == 0:
 				sd = sm.frame #if sm.frame > 0 else sm.frame
 		else:
-			sm =  abc_result(frame=max(0, sd-1), conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = 0)
+			sm =  abc_result(frame=max(0, sd-1), conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1)
 		print(sm)
 		sys.stdout.flush()
 		
