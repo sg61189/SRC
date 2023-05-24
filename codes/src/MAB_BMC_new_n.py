@@ -147,10 +147,11 @@ class bandit:
 					tm = ar_tab_old[ky].to
 					mem = ar_tab_old[ky].mem
 					#reward += 2*np.exp(-c1*mem/(1+ky) - c2*tm/(1+ky))  
-					reward += 2*np.exp(-1*tm/(1+ky))
+					reward += (1*tm/(1+ky))
 					cn += 1
-				reward = (reward)/cn #(reward + np.exp(-pen/MAX_TIME))/cn
-		else:
+				wa = reward/cn
+				reward = 2*np.exp(-wa) #(reward + np.exp(-pen/MAX_TIME))/cn
+		else
 			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1)
 			if asrt > 0:
 				reward = asrt
