@@ -25,7 +25,7 @@ MAX_FRAME = 1e4
 MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 MAX_MEM = 4000
-TIMEOUT = 5000
+TIMEOUT = 0 ##5000
 
 ST1 = 120
 ST2 = 300
@@ -87,8 +87,8 @@ def runseq(fname, seq):
 
 		if sm:
 			sd = sm.frame+1 if sm.frame > 0 else sm.frame
-			if a == 0:
-				sd = sm.frame #if sm.frame > 0 else sm.frame
+			# if a == 0:
+			# 	sd = sm.frame #if sm.frame > 0 else sm.frame
 		else:
 			sm =  abc_result(frame=max(0, sd-1), conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1)
 		print(sm)
@@ -128,7 +128,7 @@ def get_reward(asrt, frames, clauses, mems, times ):
 		# 	reward =  np.exp(1 - 0.2*frame/MAX_FRAME - 0.3*to/MAX_TIME)
 		#reward = 2*np.exp(-1*to/(1+frame)) 
 
-		reward1 = 2*np.exp(-c1*mem/(1+frame) - c2*to/(1+frame)) 
+		reward1 = 2*np.exp(-to/(1+frame)) 
 		cu_re1 += reward1
 		rewards[0].append(reward1)
 		cu_rewards[0].append(cu_re1/(j+1))
@@ -138,10 +138,10 @@ def get_reward(asrt, frames, clauses, mems, times ):
 		rewards[2].append(reward2)
 		cu_rewards[2].append(cu_re2/(j+1))
 
-		reward2 = 2*np.exp(-to/(1+frame)) 
-		cu_re2 += reward2
-		rewards[1].append(reward2)
-		cu_rewards[1].append(cu_re2/(j+1))
+		reward3 = to/(1+frame) 
+		cu_re3 += reward3
+		rewards[1].append(cu_re3)
+		cu_rewards[1].append(np.exp(-1*cu_re3/(j+1)))
 
 	return rewards, cu_rewards
 
@@ -212,28 +212,29 @@ def main(argv):
 	# pdfname = "plots/plot_Partition_{0}_{1}.pdf".format(fname, TIMEOUT)
 
 	To = [TIMEOUT]
+	K = [0, 3]
 	
 	header = ['Design', 'Action',  'Frame', 'Clauses', 'Mem', 'time', 'reward']
 	figs = []
-	string = 'Engine frames time wasted frames time wasted frames  time wasted  frames  time wasted\n'
-	for i in range(k):
+	string = 'Design Engine depth total ITF\n'
+	for i in K:
 
-		string += '\n{0} \t {1} \t'.format(fname, Actions[i]) 
+		string += '{0} \t {1} \t'.format(fname, Actions[i]) 
 		tr1, part1, rows1 = part_res(i, fname, ofname, To, 'Total', 1)
 		frames1, clauses1, mems1, times1, rewards1, cu_rewards1 = part1
-		string += tr1
+		string += tr1 + '\n'
 		
 
 		filename = "plots_IF/BMC_records_{0}_{1}.csv".format(TIMEOUT, fname)
-		# header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
-		# writing to csv file 
-		with open(filename, 'a+') as csvfile: 
-		    # creating a csv writer object 
-		    csvwriter = csv.writer(csvfile) 
+		# # header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
+		# # writing to csv file 
+		# with open(filename, 'a+') as csvfile: 
+		#     # creating a csv writer object 
+		#     csvwriter = csv.writer(csvfile) 
 		        
-		    # writing the fields 
-		    csvwriter.writerow(header) 
-		    csvwriter.writerows(rows1)
+		#     # writing the fields 
+		#     csvwriter.writerow(header) 
+		#     csvwriter.writerows(rows1)
 
 	print('@@@@@@@@@@@@@@@@ RESULTS @@@@@@@@@@@@@@@@@')
 	print(string)

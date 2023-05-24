@@ -94,18 +94,24 @@ def parse_bmc2(output, t=0):
                 print(sm)
             ar_tab.update({sm.frame:sm})  
         pretm = sm1[5]
-    # remove last one as tt > t
-    # ar_tab1 = {}
-    # if len(ar_tab.keys()) > 0:
-    #     key = sorted(ar_tab.keys(), reverse = True)[0]
-    #     # sm_res = ar_tab[key] 
-    #     for ky in ar_tab.keys():
-    #         if not (ky == key):
-    #             ar_tab1.update({ky:ar_tab[ky]})
 
+    if frame_count > 0:
+        key = frame_count + 1  
+    else:
+        key = sm.frame
+
+    # remove last one as tt > t
+    ar_tab1 = {}
     if len(ar_tab.keys()) > 0:
         key = sorted(ar_tab.keys(), reverse = True)[0]
-        sm_res = ar_tab[key] 
+        # sm_res = ar_tab[key] 
+        for ky in ar_tab.keys():
+            if (ky <= key):
+                ar_tab1.update({ky:ar_tab[ky]})
+
+    if len(ar_tab1.keys()) > 0:
+        key = sorted(ar_tab1.keys(), reverse = True)[0]
+        sm_res = ar_tab1[key] 
     else:
         sm_res = sm
     res =  asrt, sm_res, ar_tab, tt1

@@ -303,8 +303,8 @@ class bandit:
 				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k,'repeat_count', repeat_count, 'M', M)
 
 				sd = sm.frame+1 if sm.frame > 0 else sm.frame
-				if a == 0:
-					sd = sm.frame 
+				# if a == 0:
+				# 	sd = sm.frame 
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 
 				if len(best) == 0:
@@ -317,8 +317,8 @@ class bandit:
 
 				if (i < repeat_count ) or (enter_critical)  : # exploration
 					sd = sm.frame+1 if sm.frame > 0 else sm.frame
-					if a == 0:
-						sd = sm.frame 
+					# if a == 0:
+					# 	sd = sm.frame 
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
@@ -342,8 +342,8 @@ class bandit:
 				elif exit_critical and not enter_critical and i >= repeat_count: # exploitation 				
 					print('------ no exploration')
 					sd = sm.frame+1 if sm.frame > 0 else sm.frame  
-					if a == 0:
-						sd = sm.frame 
+					# if a == 0:
+					# 	sd = sm.frame 
 					self.states = sd
 					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 					seq.append(ss)
@@ -719,7 +719,8 @@ def main(argv):
 	print('-------------------------------------------')
 	print()
 	rows  = []
-	rows.append(['Bandit policy','BMC depth', 'status', 'time (s)', 'total (s)', 'memory-current (MB)', 'memory-peak (MB)', 'sequence'])
+
+	rows.append(['Design', 'Bandit-policy','BMC-depth', 'status', 'time(s)', 'total(s)', 'memory-current(MB)', 'memory-peak MB)', 'MAX-mem(BMC)(MB)', 'sequence'])
 	print('Bandit policy: \t BMC depth \t time \t sequence')
 	
 	all_plots = []
