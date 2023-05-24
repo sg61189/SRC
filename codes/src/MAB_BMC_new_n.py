@@ -161,7 +161,7 @@ class bandit:
 
 		return reward, sm, ar_tab_old
 
-	def next(d, a):
+	def Next(d, a):
 		sd = d+1 if d > 0 else d  
 		if a == 0:
 			sd = d
