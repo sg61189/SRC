@@ -161,12 +161,6 @@ class bandit:
 
 		return reward, sm, ar_tab_old
 
-	def Next(d, a):
-		sd = d+1 if d > 0 else d  
-		if a == 0:
-			sd = d
-		return sd
-
 	def run(self):
 		totalTime = 0
 		seq = []
@@ -179,6 +173,11 @@ class bandit:
 		# for a in range(self.k):
 		# 	time_outs.update({a:next_time})
 		# frames = {}
+		def Next(d, a):
+			sd = d+1 if d > 0 else d  
+			if a == 0:
+				sd = d
+			return sd
 		all_time = 0
 		repeat_count = 2*self.k
 		count = 0
