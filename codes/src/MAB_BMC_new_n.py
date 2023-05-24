@@ -195,7 +195,7 @@ class bandit:
 		end_frame = ()
 		MAX_mem = 0
 		for i in range(self.iters):
-			if all_ending:		
+			if all_ending or int(3.5*TIMEOUT - all_time) <= 0:		
 				end_frame = self.states, asrt, totalTime, seq, MAX_mem	
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime, 'all_time', all_time)
 				print('Stopping iteration -- all timeout')
