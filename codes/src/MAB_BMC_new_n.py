@@ -161,6 +161,11 @@ class bandit:
 
 		return reward, sm, ar_tab_old
 
+	def next(d, a):
+		sd = d+1 if d > 0 else d  
+		if a == 0:
+			sd = d
+		return sd
 
 	def run(self):
 		totalTime = 0
@@ -303,9 +308,7 @@ class bandit:
 				count = 0
 				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k,'repeat_count', repeat_count, 'M', M)
 
-				sd = sm.frame+1 if sm.frame > 0 else sm.frame
-				# if a == 0:
-				# 	sd = sm.frame 
+				sd = = next(sm.frame, a)
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 
 				if len(best) == 0:
@@ -317,9 +320,7 @@ class bandit:
 						print('clauses incresed -- critical phase')
 
 				if (i < repeat_count ) or (enter_critical)  : # exploration
-					sd = sm.frame+1 if sm.frame > 0 else sm.frame
-					# if a == 0:
-					# 	sd = sm.frame 
+					sd = next(sm.frame, a)
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
@@ -342,10 +343,8 @@ class bandit:
 
 				elif exit_critical and not enter_critical and i >= repeat_count: # exploitation 				
 					print('------ no exploration')
-					sd = sm.frame+1 if sm.frame > 0 else sm.frame  
-					# if a == 0:
-					# 	sd = sm.frame 
-					self.states = sd
+					 
+					self.states = next(sm.frame, a)
 					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 					seq.append(ss)
 					totalTime += tt
