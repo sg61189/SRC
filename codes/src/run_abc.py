@@ -25,7 +25,7 @@ MAX_FRAME = 1e4
 MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 MAX_MEM = 4000
-TIMEOUT = 3600
+TIMEOUT = 5000
 
 ST1 = 120
 ST2 = 300
@@ -105,9 +105,10 @@ def runseq(fname, seq):
 			break
 		else:
 			pt += t
-		
-	print('############### {0}: {1}, {2} ###################'.format( 'SAT' if asrt> 0 else 'TIMEOUT', sm.frame, pt if asrt > 0 else tt))
-	return (asrt, 'SAT' if asrt> 0 else 'TIMEOUT', sm.frame, pt if asrt > 0 else tt, ar_tab)
+	
+	frame = asrt if asrt > 0  else sm.frame
+	print('############### {0}: {1}, {2} ###################'.format( 'SAT' if asrt> 0 else 'TIMEOUT', asrt if asrt > 0  else sm.frame, pt if asrt > 0 else tt))
+	return (asrt, 'SAT' if asrt> 0 else 'TIMEOUT', frame, pt if asrt > 0 else tt, ar_tab)
 
 def get_reward(asrt, frames, clauses, mems, times ):
 	rewards = [[],[],[]]
@@ -217,7 +218,7 @@ def main(argv):
 	string = 'Engine frames time wasted frames time wasted frames  time wasted  frames  time wasted\n'
 	for i in range(k):
 
-		string += '{0} \t {1} \t'.format(fname, Actions[i]) 
+		string += '\n{0} \t {1} \t'.format(fname, Actions[i]) 
 		tr1, part1, rows1 = part_res(i, fname, ofname, To, 'Total', 1)
 		frames1, clauses1, mems1, times1, rewards1, cu_rewards1 = part1
 		string += tr1
