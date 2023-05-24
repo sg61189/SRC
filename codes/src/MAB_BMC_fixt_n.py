@@ -317,7 +317,7 @@ class bandit:
 				count = 0
 				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k, 'repeat_count', repeat_count, 'M', M)
 
-				sd = next(sm.frame, a)
+				sd = Next(sm.frame, a)
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 
 				if len(best) == 0:
@@ -329,7 +329,7 @@ class bandit:
 						print('clauses incresed -- critical phase')
 
 				if (i < repeat_count ) or (enter_critical)  : # exploration
-					sd = next(sm.frame, a)
+					sd = Next(sm.frame, a)
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
@@ -352,7 +352,7 @@ class bandit:
 
 				elif all_ending or (exit_critical and not enter_critical and i >= repeat_count): # exploitation 				
 					print('------ no exploration')
-					sd = next(sm.frame, a) 
+					sd = Next(sm.frame, a) 
 					self.states = sd
 					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 					seq.append(ss)
