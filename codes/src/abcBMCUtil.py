@@ -98,7 +98,7 @@ def parse_bmc2(output, t=0):
     if frame_count > 0:
         key = frame_count + 1  
     else:
-        key = sm.frame
+        key = sm.frame if (sm and sm is not None) else 0
 
     # remove last one as tt > t
     ar_tab1 = {}
