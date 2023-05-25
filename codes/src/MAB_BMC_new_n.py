@@ -177,8 +177,8 @@ class bandit:
 		# frames = {}
 		def Next(d, a):
 			sd = d+1 if d > 0 else d  
-			if a == 0:
-				sd = d
+			# if a == 0:
+			# 	sd = d
 			return sd
 		all_time = 0
 		repeat_count = 2*self.k
@@ -300,9 +300,9 @@ class bandit:
 				if MAX_mem < sm.mem:
 					MAX_mem = sm.mem
 			# fragmentation
-			tt = sm.tt if sm.asrt > 0 else self.timeout[i] #  else math.ceil(sm.tt) # self.timeout[i]
+			tt =  math.ceil(sm.tt) #sm.tt if sm.asrt > 0 else self.timeout[i] #  else math.ceil(sm.tt) # self.timeout[i]
 
-			all_time += tt #self.timeout[i]
+			all_time += sm.tt if sm.asrt > 0 else self.timeout[i]
 			
 			sd = self.states
 			if sm and reward > 0:
@@ -330,7 +330,8 @@ class bandit:
 					max_conf = max(max_conf, sm.cla)
 
 					print('------ exploring --', i, 'critical', critical, 'best_sd', best_sd, 'max_conf', max_conf)
-					if (i < repeat_count and i%self.k == self.k-1) or (enter_critical and ocount >= M-1) or (i < repeat_count and sm.asrt > 0) or (enter_critical and sm.asrt > 0):
+					if (i < repeat_count and i%self.k == self.k-1) or (enter_critical and ocount >= M-1) \
+					or (i < repeat_count and sm.asrt > 0) or (enter_critical and sm.asrt > 0):
 						# end of exploration --- pick the best one
 						print('------ at the end of exploration')
 						# sd = sm.frame+1 if sm.frame > 0 else sm.frame
