@@ -190,7 +190,7 @@ def parse_bmc3(output, t=0, scale = 1):
         sm1 = ar_tab[key] 
         if asrt_del > 0:
             asrt = sm1.frame
-        sm_res =  abc_result(frame=sm1.frame, var=sm1.var, cla=sm1.cla, conf = sm1.conf, mem = sm1.mem, to=sm1.to, asrt=asrt, tt= sm1.tt)
+        sm_res =  abc_result(frame=sm1.frame, var=sm1.var, cla=sm1.cla, conf = sm1.conf, mem = sm1.mem, to=sm1.to, asrt=asrt, tt= sm1.tt, ld=sm1.ld)
     else:
         sm_res = sm
     res =  asrt, sm_res, ar_tab, tt1
