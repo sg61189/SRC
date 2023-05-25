@@ -1,7 +1,8 @@
 import numpy as np 
-import matplotlib.pyplot as plt 
-
-from matplotlib.backends.backend_pdf import PdfPages
+PLOT = False
+if PLOT:
+	import matplotlib.pyplot as plt 
+	from matplotlib.backends.backend_pdf import PdfPages
 import pandas as pd 
 import os, sys, subprocess, getopt, gc, time, re, math, csv
 from collections import namedtuple
@@ -29,6 +30,7 @@ MAX_FRAME = 1e9
 MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 MAX_MEM = 2000
+MAX_TIMEOUT = 2*MAX_TIME
 F = 3
 
 time_outs = {}
@@ -164,7 +166,7 @@ class bandit:
 				wa = reward/cn
 				reward = 2*np.exp(-wa)#(reward + np.exp(-pen/MAX_TIME))/cn
 		else:
-			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1)
+			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1,ld= sd)
 			if asrt > 0:
 				reward = asrt
 			else:
@@ -187,10 +189,10 @@ class bandit:
 
 		def Next(d, a):
 			sd = d+1 if d > 0 else d  
-			if a == 0:
-				sd = d
+			# if a == 0:
+			# 	sd = d
 			return sd
-		
+
 		frames = {}
 		count = 0
 		best_sd = 0
@@ -216,7 +218,7 @@ class bandit:
 		MAX_mem = 0
 		for i in range(4*self.iters):
 
-			if all_ending or int(3.8*TIMEOUT - all_time) <= 0:		
+			if all_ending or int(1.25*MAX_TIMEOUT - all_time) <= 0:		
 				end_frame = self.states, asrt, totalTime, seq, MAX_mem
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime, 'all_time', all_time)
 				print('Stopping iteration -- all timeout')
@@ -269,10 +271,10 @@ class bandit:
 				else:
 					self.timeout[i] = min(self.timeout[i], TIMEOUT - totalTime)
 			
-			if int(3.0*TIMEOUT - all_time) <= 0:		
+			if int(MAX_TIMEOUT - all_time) <= 0:		
 				a = self.pull(a, count=2)
-				self.timeout[i] = min(0.9*TIMEOUT, TIMEOUT - totalTime)
-				print('More than {0} hrs spent in learning --- closing iterations now'.format(3.0))
+				self.timeout[i] = min(0.25*MAX_TIMEOUT, TIMEOUT - totalTime)
+				print('More than {0} hrs spent in learning --- closing iterations now'.format(MAX_TIMEOUT/TIMEOUT))
 				all_ending = True
 				enter_critical = False
 				exit_critical = True
@@ -317,7 +319,7 @@ class bandit:
 				count = 0
 				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k, 'repeat_count', repeat_count, 'M', M)
 
-				sd = Next(sm.frame, a)
+				sd = Next(sm.ld, a)
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 
 				if len(best) == 0:
@@ -329,7 +331,7 @@ class bandit:
 						print('clauses incresed -- critical phase')
 
 				if (i < repeat_count ) or (enter_critical)  : # exploration
-					sd = Next(sm.frame, a)
+					sd = Next(sm.ld, a)
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
@@ -352,7 +354,7 @@ class bandit:
 
 				elif all_ending or (exit_critical and not enter_critical and i >= repeat_count): # exploitation 				
 					print('------ no exploration')
-					sd = Next(sm.frame, a) 
+					sd = Next(sm.ld, a) 
 					self.states = sd
 					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 					seq.append(ss)
@@ -664,7 +666,8 @@ def main(argv):
 	options = [eps_high_alpha, ucb1]
 	labels = [r'$erwa$'.format(alpha), 'ucb1']
 
-	pp = PdfPages("plots_IF/plot_MAB_BMC_fixn_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
+	if PLOT:
+		pp = PdfPages("plots_IF/plot_MAB_BMC_fixn_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
 	j = 0
 	all_rewards = []
 	all_selection = []
@@ -696,18 +699,18 @@ def main(argv):
 		all_rewards.append(rewards)
 		all_selection.append(selection)
 
-		fig1 = plt.figure(figsize=(12,8))
-		plt.plot(rewards, label=labels[j])
-		plt.legend(bbox_to_anchor=(1.3, 0.5))
-		plt.xlabel("Iterations")
-		plt.ylabel("Average Reward")
-		plt.title("Average Rewards after " + str(episodes)  + " Episodes")
-		plt.legend()
+		if PLOT:
+			fig1 = plt.figure(figsize=(12,8))
+			plt.plot(rewards, label=labels[j])
+			plt.legend(bbox_to_anchor=(1.3, 0.5))
+			plt.xlabel("Iterations")
+			plt.ylabel("Average Reward")
+			plt.title("Average Rewards after " + str(episodes)  + " Episodes")
+			plt.legend()
+			pp.savefig(fig1)   
 
 		j += 1
-		# plt.show()
-
-		pp.savefig(fig1)   
+		# plt.show() 
 		etime = time.time()
 		# displaying the memory
 		current, peak = tracemalloc.get_traced_memory()
@@ -727,14 +730,16 @@ def main(argv):
 	print('Bandit policy: \t BMC depth \t time \t sequence')
 	
 	all_plots = []
-	fig2 = plt.figure()
+	if PLOT:
+		fig2 = plt.figure()
 	for j in range(len(options)):
 		d, a, t, seq, mem = all_results[j]
 		print('{0}: \t {1} ({4}) \t time: {2:0.2f} s, real: {5:0.2f}s, Memory: {6:0.2f}MB,{7:0.2f}MB {8}MB \t {3} '.format(labels[j], a if a > 0 else d, t, seq, 'assert' if a>0 else '', all_times[j][0], all_times[j][1], all_times[j][2], mem))
 		rows.append([fname, labels[j], a if a > 0 else d, 'sat' if a>0 else 'timeout', '{0:0.2f}'.format(t), '{0:0.2f}'.format(all_times[j][0]), '{0:0.2f}'.format(all_times[j][1]), mem, '{0:0.2f}'.format(all_times[j][2]), seq])
 
-		plt.plot(all_rewards[j], label=labels[j])
-		plt.legend(bbox_to_anchor=(1.3, 0.5))
+		if PLOT:
+			plt.plot(all_rewards[j], label=labels[j])
+			plt.legend(bbox_to_anchor=(1.3, 0.5))
 
 		to_plot = [[],[]]
 		for ss in seq:
@@ -743,29 +748,31 @@ def main(argv):
 			to_plot[1].append(rw)
 		all_plots.append(to_plot)
 
-	plt.xlabel("Iterations")
-	plt.ylabel("Average Reward")
-	plt.title("Average Rewards after " + str(episodes)  + " Episodes")
-	plt.legend()
-	pp.savefig(fig2)
+	if PLOT:
+		plt.xlabel("Iterations")
+		plt.ylabel("Average Reward")
+		plt.title("Average Rewards after " + str(episodes)  + " Episodes")
+		plt.legend()
+		pp.savefig(fig2)
 
-	fig3 = plt.figure()
-	for j in range(len(options)):
-		to_plot = all_plots[j]
-		plt.plot(to_plot[0], to_plot[1], label=labels[j])
+		fig3 = plt.figure()
+		for j in range(len(options)):
+			to_plot = all_plots[j]
+			plt.plot(to_plot[0], to_plot[1], label=labels[j])
 
-	plt.xlabel("Frames")
-	plt.ylabel("Reward")
-	# plt.title("Average Rewards after " + str(episodes)  + " Episodes")
-	plt.legend()
-	pp.savefig(fig3)
+		plt.xlabel("Frames")
+		plt.ylabel("Reward")
+		# plt.title("Average Rewards after " + str(episodes)  + " Episodes")
+		plt.legend()
+		pp.savefig(fig3)
+
+		pp.close()
 
 	opt_per = np.array(all_selection)/ iters * 100
 	df = pd.DataFrame(opt_per, index=labels, columns=[Actions[x] for x in range(0, k)])
 	print("Percentage of actions selected:")
 	print(df)
 	
-	pp.close()
 
 	with open(filename, 'a+') as csvfile: 
 		csvwriter = csv.writer(csvfile) 

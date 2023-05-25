@@ -7,7 +7,7 @@ DEBUG = True
 DEBUG = False
 
 PATH = "../"
-abc_result =  namedtuple('abc_result', ['frame', 'var', 'cla', 'conf', 'mem' ,'to', 'asrt', 'tt']) 
+abc_result =  namedtuple('abc_result', ['frame', 'var', 'cla', 'conf', 'mem' ,'to', 'asrt', 'tt', 'ld']) 
 
 # output = 'Output 0 of miter "../benchmark/HWMCC15/6s20_n" was asserted in frame 9. Time =    30.04 sec'
 # print(m3, asrt)
@@ -88,8 +88,13 @@ def parse_bmc2(output, t=0):
             print(sm1, m1.group(1), m21.group(1), asrt)   
         if sm1[3] > 0 and ( asrt > 0 or frame_count > 0): # and sm1[0] <= frame_count):   
             tt = sm1[5] #if t == 0  else t
-            to = sm1[5] - pretm
-            sm = abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = sm1[4], to=to, asrt=asrt, tt = tt) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
+            to = max(0,sm1[5] - pretm)
+            ld = sm1[0]
+            if frame_count > 0:
+                ld = frame_count
+            # if asrt > 0:
+            #     ld = asrt
+            sm = abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = sm1[4], to=to, asrt=asrt, tt = tt, ld=ld) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
             if DEBUG:
                 print(sm)
             ar_tab.update({sm.frame:sm})  
@@ -161,8 +166,14 @@ def parse_bmc3(output, t=0, scale = 1):
             print(sm1)   
         if sm1[2] > 0 or (frame_count > 0): # and sm1[0] <= frame_count):   
             tt = sm1[7]*scale #if t == 0  else t
-            to = sm1[7] - pretm
-            sm =  abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = max(sm1[5], sm1[6]), to=to, asrt=asrt, tt=tt) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
+            to = max(0, sm1[7] - pretm)
+
+            ld = sm1[0]
+            # if frame_count > 0:
+            #     ld = frame_count
+            # if asrt > 0:
+            #     ld = asrt
+            sm =  abc_result(frame=sm1[0], var=sm1[1], cla=sm1[2], conf = sm1[3], mem = max(sm1[5], sm1[6]), to=to, asrt=asrt, tt=tt, ld=ld) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
             if DEBUG or once:
                 print(sm)
                 once = False
@@ -208,7 +219,13 @@ def pdr(ofname, t):
         sm1 = int(m1.group(1)), float(m1.group(2))
         if DEBUG:
             print(sm1)  
-        sm =  abc_result(frame=sm1[1], conf=0, var=0, cla=0, mem = -1, to=sm1[0], asrt=asrt, tt = t) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
+
+        ld = sm1[1]
+        # if frame_count > 0:
+        #     ld = frame_count
+        # if asrt > 0:
+        #     ld = asrt
+        sm =  abc_result(frame=sm1[1], conf=0, var=0, cla=0, mem = -1, to=sm1[0], asrt=asrt, tt = t, ld = ld) #, io=(sm2[0], sm2[1]), lat=sm2[2], ag = sm2[3], lev = sm2[4])
         ar_tab.update({sm.frame:sm})  
      
     if len(ar_tab.keys()) > 0:
