@@ -77,7 +77,7 @@ class bandit:
 		# get starting depth
 		# sd = 0
 		# if self.n  == 0:
-		sd = int(self.states) #[a])
+		sd = int(self.states)+1 if int(self.states) > 0 else int(self.states) 
 
 		fname = os.path.join(PATH, self.fname)
 		#ofname = os.path.join(PATH,(self.fname.split('/')[-1]),'new', ((self.fname.split('/')[-1]).split('.')[0])+'_n.'+( ((self.fname.split('/')[-1])).split('.')[1]))
@@ -118,7 +118,10 @@ class bandit:
 
 		ar_tab_old = self.engine_res[a]
 		for ky in ar_tab.keys():
-			ar_tab_old.update({ky:ar_tab[ky]})
+			sm1 = ar_tab[ky]
+			if sm1 and  sm1.frame > sd:
+				sm = sm1
+				ar_tab_old.update({ky:sm})
 
 		self.engine_res[a] = ar_tab_old
 
@@ -153,8 +156,8 @@ class bandit:
 					cn += 1
 				wa = reward/cn
 				reward = 2*np.exp(-wa) #(reward + np.exp(-pen/MAX_TIME))/cn
-				
-				if self.states > sm.frame:
+
+				if sd > sm.frame:
 					reward = -1 * np.exp(t/MAX_TIME)
 		else:
 			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1, ld = sd)
@@ -162,7 +165,7 @@ class bandit:
 				reward = asrt
 			else:
 				reward = -1 * np.exp(t/MAX_TIME) #np.log(t)
-		print(reward, sm)
+		print(sd, sm.frame, reward, sm)
 
 		return reward, sm, ar_tab_old
 
@@ -178,11 +181,11 @@ class bandit:
 		# for a in range(self.k):
 		# 	time_outs.update({a:next_time})
 		# frames = {}
-		def Next(d, a):
-			sd = d+1 if d > 0 else d  
-			# if a == 0:
-			# 	sd = d
-			return sd
+		# def Next(d, a):
+		# 	sd = d+1 if d > 0 else d  
+		# 	# if a == 0:
+		# 	# 	sd = d
+		# 	return sd
 		all_time = 0
 		repeat_count = 2*self.k
 		count = 0
@@ -312,7 +315,7 @@ class bandit:
 				count = 0
 				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k,'repeat_count', repeat_count, 'M', M)
 
-				sd = Next(sm.ld, a)
+				sd = sm.ld #Next(sm.ld, a)
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 
 				if len(best) == 0:
@@ -324,7 +327,7 @@ class bandit:
 						print('clauses incresed -- critical phase')
 
 				if (i < repeat_count ) or (enter_critical)  : # exploration
-					sd = Next(sm.ld, a)
+					sd = sm.ld #Next(sm.ld, a)
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
@@ -356,7 +359,7 @@ class bandit:
 				elif exit_critical and not enter_critical and i >= repeat_count: # exploitation 				
 					print('------ no exploration')
 					 
-					self.states = Next(sm.ld, a)
+					self.states = sm.ld #Next(sm.ld, a)
 					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 					seq.append(ss)
 					totalTime += tt
@@ -633,8 +636,8 @@ def main(argv):
 	filename = "plots_IF/MAB_BMC_results_n_IF_{0}_{1}.csv".format(TIMEOUT, fname)
 	# header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
 	# writing to csv file 
-	with open(filename, 'w+') as csvfile: 
-		print('filename', inputfile)
+	# with open(filename, 'w+') as csvfile: 
+	# 	print('filename', inputfile)
 
 	k = 7 # arms
 	iters = 1000 #int((TIMEOUT/T)) 
@@ -735,7 +738,7 @@ def main(argv):
 	print()
 	rows  = []
 
-	rows.append(['Design', 'Bandit-policy','BMC-depth', 'status', 'time(s)', 'total(s)', 'memory-current(MB)', 'memory-peak MB)', 'MAX-mem(BMC)(MB)', 'sequence'])
+	rows.append(['Design','Stategy2', 'Bandit-policy','BMC-depth', 'status', 'time(s)', 'total(s)', 'memory-current(MB)', 'memory-peak MB)', 'MAX-mem(BMC)(MB)', 'sequence'])
 	print('Bandit policy: \t BMC depth \t time \t sequence')
 	
 	all_plots = []
@@ -744,7 +747,7 @@ def main(argv):
 	for j in range(len(options)):
 		d, a, t, seq, mem = all_results[j]
 		print('{0}: \t {1} ({4}) \t time: {2:0.2f} s, real: {5:0.2f}s, Memory: {6:0.2f}MB,{7:0.2f}MB {8}MB \t {3} '.format(labels[j], a if a > 0 else d, t, seq, 'assert' if a>0 else '', all_times[j][0], all_times[j][1], all_times[j][2], mem))
-		rows.append([fname, labels[j], a if a > 0 else d, 'sat' if a>0 else 'timeout', '{0:0.2f}'.format(t), '{0:0.2f}'.format(all_times[j][0]), '{0:0.2f}'.format(all_times[j][1]), mem, '{0:0.2f}'.format(all_times[j][2]), seq])
+		rows.append([fname, 'Stategy2',labels[j], a if a > 0 else d, 'sat' if a>0 else 'timeout', '{0:0.2f}'.format(t), '{0:0.2f}'.format(all_times[j][0]), '{0:0.2f}'.format(all_times[j][1]), mem, '{0:0.2f}'.format(all_times[j][2]), seq])
 
 		if PLOT:
 			plt.plot(all_rewards[j], label=labels[j])
