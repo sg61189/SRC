@@ -30,7 +30,7 @@ MAX_FRAME = 1e9
 MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 MAX_MEM = 2000
-MAX_TIMEOUT = 3*MAX_TIME
+MAX_TIMEOUT = 2*MAX_TIME
 F = 3
 
 time_outs = {}
@@ -335,7 +335,7 @@ class bandit:
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
-						
+
 					elif best_sd == sd:
 						if best[1] > sm.tt:
 							best_sd = sd
