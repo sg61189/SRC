@@ -335,6 +335,11 @@ class bandit:
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
+						
+					elif best_sd == sd:
+						if best[1] > sm.tt:
+							best_sd = sd
+							best = ss
 					#best_sd = max(best_sd, sd)
 					# if (i < repeat_count):
 					max_conf = max(max_conf, sm.cla)
@@ -345,10 +350,11 @@ class bandit:
 						print('------ at the end of exploration')
 						# sd = sm.frame+1 if sm.frame > 0 else sm.frame
 						# best_sd = max(best_sd, sd)
-						self.states = best_sd
-						ss = best #(Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
-						seq.append(ss)
-						totalTime += tt
+						if self.states < best_sd:		
+							self.states = best_sd
+							ss = best #(Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
+							seq.append(ss)
+							totalTime += tt
 						# if (i < repeat_count and i%self.k == self.k-1):
 						conf_begin_phase = max_conf
 
@@ -622,11 +628,11 @@ def main(argv):
 
 	fname = (inputfile.split('/')[-1]).split('.')[0]
 	print(fname)
-	filename = "plots_IF/MAB_BMC_results_fixt_IF_{0}_{1}.csv".format(TIMEOUT, fname)
-	# header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
-	# writing to csv file 
-	with open(filename, 'w+') as csvfile: 
-		print('filename', inputfile)
+	# filename = "plots_IF/MAB_BMC_results_fixt_IF_{0}_{1}.csv".format(TIMEOUT, fname)
+	# # header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
+	# # writing to csv file 
+	# with open(filename, 'w+') as csvfile: 
+	# 	print('filename', inputfile)
 
 	k = 7 # arms
 	iters = 1000 #int((TIMEOUT/T)) 
@@ -663,8 +669,8 @@ def main(argv):
 	# options = [ eps_01, eps_1_alpha, eps_decay, ucb1, o_eps_01]
 	# labels = [ r'$\epsilon=0.4$', r'$\epsilon=0.1, \alpha = {0}$'.format(alpha), r'$\epsilon-decay$', 'ucb1', r'opt $\epsilon=0.01$' ]
 
-	options = [eps_high_alpha, ucb1]
-	labels = [r'$erwa$'.format(alpha), 'ucb1']
+	options = [ucb1]
+	labels = ['ucb1']
 
 	if PLOT:
 		pp = PdfPages("plots_IF/plot_MAB_BMC_fixn_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))

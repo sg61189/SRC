@@ -325,6 +325,10 @@ class bandit:
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
+					elif best_sd == sd:
+						if best[1] > sm.tt:
+							best_sd = sd
+							best = ss
 					#best_sd = max(best_sd, sd)
 					# if (i < repeat_count):
 					max_conf = max(max_conf, sm.cla)
@@ -336,10 +340,13 @@ class bandit:
 						print('------ at the end of exploration')
 						# sd = sm.frame+1 if sm.frame > 0 else sm.frame
 						# best_sd = max(best_sd, sd)
-						self.states = best_sd
-						ss = best #(Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
-						seq.append(ss)
-						totalTime += tt
+						if self.states < best_sd:		
+							self.states = best_sd
+							ss = best #(Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
+							seq.append(ss)
+							totalTime += tt
+						# else:
+						# 	increase_time = True
 						# if (i < repeat_count and i%self.k == self.k-1):
 						conf_begin_phase = max_conf
 
