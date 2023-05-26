@@ -77,7 +77,7 @@ class bandit:
 		# get starting depth
 		# sd = 0
 		# if self.n  == 0:
-		sd = int(self.states) #[a])
+		sd = int(self.states)+1 if int(self.states) > 0 else int(self.states) 
 
 		fname = os.path.join(PATH, self.fname)
 		#ofname = os.path.join(PATH,(self.fname.split('/')[-1]),'new', ((self.fname.split('/')[-1]).split('.')[0])+'_n.'+( ((self.fname.split('/')[-1])).split('.')[1]))
@@ -119,8 +119,8 @@ class bandit:
 		ar_tab_old = self.engine_res[a]
 		for ky in ar_tab.keys():
 			sm1 = ar_tab[ky]
+			sm = sm1
 			if sm1 and  sm1.frame > sm1.ld+1:
-				sm = sm1
 				break
 			ar_tab_old.update({ky:ar_tab[ky]})
 
@@ -182,11 +182,11 @@ class bandit:
 		# for a in range(self.k):
 		# 	time_outs.update({a:next_time})
 		# frames = {}
-		def Next(d, a):
-			sd = d+1 if d > 0 else d  
-			# if a == 0:
-			# 	sd = d
-			return sd
+		# def Next(d, a):
+		# 	sd = d+1 if d > 0 else d  
+		# 	# if a == 0:
+		# 	# 	sd = d
+		# 	return sd
 		all_time = 0
 		repeat_count = 2*self.k
 		count = 0
@@ -316,7 +316,7 @@ class bandit:
 				count = 0
 				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k,'repeat_count', repeat_count, 'M', M)
 
-				sd = Next(sm.ld, a)
+				sd = sm.ld #Next(sm.ld, a)
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 
 				if len(best) == 0:
@@ -328,7 +328,7 @@ class bandit:
 						print('clauses incresed -- critical phase')
 
 				if (i < repeat_count ) or (enter_critical)  : # exploration
-					sd = Next(sm.ld, a)
+					sd = sm.ld #Next(sm.ld, a)
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
@@ -360,7 +360,7 @@ class bandit:
 				elif exit_critical and not enter_critical and i >= repeat_count: # exploitation 				
 					print('------ no exploration')
 					 
-					self.states = Next(sm.ld, a)
+					self.states = sm.ld #Next(sm.ld, a)
 					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 					seq.append(ss)
 					totalTime += tt
