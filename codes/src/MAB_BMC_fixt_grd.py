@@ -170,7 +170,7 @@ class bandit:
 					cn += 1
 				wa = reward/cn
 				reward = 2*np.exp(-wa)#(reward + np.exp(-pen/MAX_TIME))/cn
-				if self.states > sm.frame:
+				if sd > sm.frame:
 					reward = -1 * np.exp(t/MAX_TIME)
 		else:
 			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1,ld= sd)

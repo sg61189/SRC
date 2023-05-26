@@ -170,7 +170,8 @@ class bandit:
 					cn += 1
 				wa = reward/cn
 				reward = 2*np.exp(-wa)#(reward + np.exp(-pen/MAX_TIME))/cn
-				if self.states > sm.frame:
+
+				if sd > sm.frame:
 					reward = -1 * np.exp(t/MAX_TIME)
 		else:
 			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1,ld= sd)
@@ -739,7 +740,7 @@ def main(argv):
 
 	rows  = []
 	
-	rows.append(['Design', 'Bandit-policy','BMC-depth', 'status', 'time(s)', 'total(s)', 'memory-current(MB)', 'memory-peak MB)', 'MAX-mem(BMC)(MB)', 'sequence'])
+	rows.append(['Design','Stategy1', 'Bandit-policy','BMC-depth', 'status', 'time(s)', 'total(s)', 'memory-current(MB)', 'memory-peak MB)', 'MAX-mem(BMC)(MB)', 'sequence'])
 	print('Bandit policy: \t BMC depth \t time \t sequence')
 	
 	all_plots = []
@@ -748,7 +749,7 @@ def main(argv):
 	for j in range(len(options)):
 		d, a, t, seq, mem = all_results[j]
 		print('{0}: \t {1} ({4}) \t time: {2:0.2f} s, real: {5:0.2f}s, Memory: {6:0.2f}MB,{7:0.2f}MB {8}MB \t {3} '.format(labels[j], a if a > 0 else d, t, seq, 'assert' if a>0 else '', all_times[j][0], all_times[j][1], all_times[j][2], mem))
-		rows.append([fname, labels[j], a if a > 0 else d, 'sat' if a>0 else 'timeout', '{0:0.2f}'.format(t), '{0:0.2f}'.format(all_times[j][0]), '{0:0.2f}'.format(all_times[j][1]), mem, '{0:0.2f}'.format(all_times[j][2]), seq])
+		rows.append([fname,'Stategy1', labels[j], a if a > 0 else d, 'sat' if a>0 else 'timeout', '{0:0.2f}'.format(t), '{0:0.2f}'.format(all_times[j][0]), '{0:0.2f}'.format(all_times[j][1]), mem, '{0:0.2f}'.format(all_times[j][2]), seq])
 
 		if PLOT:
 			plt.plot(all_rewards[j], label=labels[j])
