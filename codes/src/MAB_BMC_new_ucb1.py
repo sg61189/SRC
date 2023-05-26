@@ -119,10 +119,9 @@ class bandit:
 		ar_tab_old = self.engine_res[a]
 		for ky in ar_tab.keys():
 			sm1 = ar_tab[ky]
-			sm = sm1
-			if sm1 and  sm1.frame > sm1.ld+1:
-				break
-			ar_tab_old.update({ky:ar_tab[ky]})
+			if sm1 and  sm1.frame > sd:
+				sm = sm1
+				ar_tab_old.update({ky:sm})
 
 		self.engine_res[a] = ar_tab_old
 
@@ -166,7 +165,7 @@ class bandit:
 				reward = asrt
 			else:
 				reward = -1 * np.exp(t/MAX_TIME) #np.log(t)
-		print(reward, sm)
+		print(sd, sm.frame, reward, sm)
 
 		return reward, sm, ar_tab_old
 

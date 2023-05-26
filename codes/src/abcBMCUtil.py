@@ -70,7 +70,6 @@ def parse_bmc2(output, t=0):
             print(m21.group(1)) 
         frame_count = int(m21.group(1))
 
-    print(frame_count)
     #Output 0 of miter "../benchmark/HWMCC15/6s20_n" was asserted in frame 9
     xx2 = r'Output.+was[ \t]+asserted[ \t]+in[ \t]+frame[ \t]+([\d]+).[.]*'
     m3 = re.finditer(xx2, output, re.M|re.I)
@@ -86,7 +85,8 @@ def parse_bmc2(output, t=0):
         tt1 = sm1[5] 
         if DEBUG:
             print(sm1, m1.group(1), m21.group(1), asrt)   
-        if sm1[3] > 0 and ( asrt > 0 or frame_count > 0): # and sm1[0] <= frame_count):   
+        if sm1[3] > 0 and ( asrt > 0 and sm1[0] <= asrt) or (frame_count > 0 and sm1[0] <= frame_count+1): 
+             
             tt = sm1[5] #if t == 0  else t
             to = max(0,sm1[5] - pretm)
             ld = sm1[0]
@@ -105,20 +105,15 @@ def parse_bmc2(output, t=0):
     else:
         key = sm.frame if (sm and sm is not None) else 0
 
+    print('frame_count', frame_count, key)
     # remove last one as tt > t
-    ar_tab1 = {}
+    sm = None
     if len(ar_tab.keys()) > 0:
-        #key = sorted(ar_tab.keys(), reverse = True)[0]
-        # sm_res = ar_tab[key] 
-        for ky in ar_tab.keys():
-            if (ky <= key):
-                ar_tab1.update({ky:ar_tab[ky]})
-
-    if len(ar_tab1.keys()) > 0:
-        key = sorted(ar_tab1.keys(), reverse = True)[0]
-        sm_res = ar_tab1[key] 
+        key = sorted(ar_tab.keys(), reverse = True)[0]
+        sm_res = ar_tab[key] 
     else:
         sm_res = sm
+    print('sm_res', sm_res)
     res =  asrt, sm_res, ar_tab, tt1
     return res
 
