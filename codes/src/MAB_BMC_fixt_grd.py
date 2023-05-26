@@ -628,7 +628,7 @@ def main(argv):
 
 	fname = (inputfile.split('/')[-1]).split('.')[0]
 	print(fname)
-	# filename = "plots_IF/MAB_BMC_results_fixt_IF_{0}_{1}.csv".format(TIMEOUT, fname)
+	filename = "plots_IF/MAB_BMC_results_fixt_IF_{0}_{1}.csv".format(TIMEOUT, fname)
 	# # header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
 	# # writing to csv file 
 	# with open(filename, 'w+') as csvfile: 
