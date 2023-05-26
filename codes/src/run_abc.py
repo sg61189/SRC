@@ -90,7 +90,7 @@ def runseq(fname, seq):
 			# if a == 0:
 			# 	sd = sm.frame #if sm.frame > 0 else sm.frame
 		else:
-			sm =  abc_result(frame=max(0, sd-1), conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1)
+			sm =  abc_result(frame=max(0, sd-1), conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1, ld = max(0, sd-1))
 		print(sm)
 		sys.stdout.flush()
 		

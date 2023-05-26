@@ -108,7 +108,7 @@ def parse_bmc2(output, t=0):
     # remove last one as tt > t
     ar_tab1 = {}
     if len(ar_tab.keys()) > 0:
-        key = sorted(ar_tab.keys(), reverse = True)[0]
+        #key = sorted(ar_tab.keys(), reverse = True)[0]
         # sm_res = ar_tab[key] 
         for ky in ar_tab.keys():
             if (ky <= key):
