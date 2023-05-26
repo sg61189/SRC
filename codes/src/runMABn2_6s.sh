@@ -11,8 +11,8 @@ python3 MAB_BMC_fixt_n.py -i benchmark/HWMCC_15_17/${fn}.aig > logs_IF/log_mabmc
 echo "----------------- Running MAB_bmc_new ------------------"
 python3 MAB_BMC_new_n.py -i benchmark/HWMCC_15_17/${fn}.aig > logs_IF/log_mabmc_IF_${fn}_D3.txt
 
-echo "----------------- Separate abc ------------------"
-python3 run_abc.py -i benchmark/HWMCC_15_17/${fn}.aig > logs_IF/log_abc_${fn}.txt
+# echo "----------------- Separate abc ------------------"
+# python3 run_abc.py -i benchmark/HWMCC_15_17/${fn}.aig > logs_IF/log_abc_${fn}.txt
 #echo "----------------- Running MAB_bmc_frame ------------------"
 #python3 MAB_BMC_fo.py -i benchmark/HWMCC_15_17/${fn}.aig > logs/log_mabmc_fo_${fn}_D3.txt
 # echo "----------------- Running Superdeep ------------------"
