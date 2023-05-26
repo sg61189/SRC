@@ -55,7 +55,7 @@ def simplify(fname, ofname):
     out, output =  run_cmd(st)
 
 
-def parse_bmc2(output, t=0):
+def parse_bmc2(output, sd,t=0):
     ar_tab = OrderedDict()
     sm = None
     xx = r'[ \t]+([\d]+)[ \t]+[:][ \t]+F[ \t]+=[ \t]*([\d]+).[ \t]+O[ \t]+=[ \t]*([\d]+).[ \t]+And[ \t]+=[ \t]*([\d]+).[ \t]+Var[ \t]+=[ \t]*([\d]+).[ \t]+Conf[ \t]+=[ \t]*([\d]+).[ \t]+.*([\d]+)[ \t]+MB[ \t]+([\d]+[.][\d]+)[ \t]+sec'
@@ -85,7 +85,7 @@ def parse_bmc2(output, t=0):
         tt1 = sm1[5] 
         if DEBUG:
             print(sm1, m1.group(1), m21.group(1), asrt)   
-        if sm1[3] > 0 and ( asrt > 0 and sm1[0] <= asrt) or (frame_count > 0 and sm1[0] <= frame_count+1): 
+        if sm1[3] > 0 and ( asrt > 0 and sm1[0] <= asrt) or (frame_count > 0 and sm1[0] <= frame_count+1 and frame_count >= sd): 
              
             tt = sm1[5] #if t == 0  else t
             to = max(0,sm1[5] - pretm)
@@ -238,7 +238,7 @@ def bmc2(ofname, sd, t=0, f=0):
     st = ' '.join([cmdName, "-c", command]) #, "--boound", "20"]
     print(st)
     out, output =  run_cmd(st)
-    res = parse_bmc2(output,t)
+    res = parse_bmc2(output,sd, t)
     return res
 
 def bmc3(ofname, sd, t=0, f=0):
