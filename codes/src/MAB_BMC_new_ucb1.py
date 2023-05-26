@@ -16,7 +16,7 @@ DEBUG = True
 DEBUG = False
 OPT = True
 T = 60 
-TIMEOUT = 3600#/2.0
+TIMEOUT = 3600 #/2.0
 SC = 2
 DIFF = 1 # BMC depth absolute
 DIFF = 0 # BMC depth relative
@@ -26,7 +26,7 @@ DIFF = 3 # function number of frames/time diff
 FIXED = False
 FIXED = True
 PDR = False
-MAX_FRAME = 1e9
+MAX_FRAME = 1000
 MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 MAX_MEM = 2000
@@ -35,15 +35,6 @@ F = 3
 
 time_outs = {}
 Actions = ['bmc2', 'bmc3', 'bmc3rs', 'bmc3j', 'bmc3rg', 'bmcru', 'bmc3r', 'pdr']
-To1 = []
-st = 60
-tot = 0
-Iters = 0
-while tot < TIMEOUT:
-	To1.append(st)
-	tot += st
-	st = min(st*SC,  TIMEOUT - tot)
-	Iters += 1
 
 M = int(len(Actions))
 
@@ -72,14 +63,14 @@ class bandit:
 		##
 		self.fname =  fname
 		self.timeout = np.zeros(iters)
-		#for i in range(iters):
-		self.timeout[0] = To1[0]
-		
-		self.engine_res = [{} for i in range(k)]
+		self.timeout[0] = T
 
+		self.engine_res = [{} for i in range(k)]
 
 		# current state of the run; eg - bmc depth
 		self.states = 0
+
+		self.explore = False
 
 	def get_reward(self, a, t1 = -1):
 
@@ -124,11 +115,6 @@ class bandit:
 			asrt, sm, ar_tab, tt1 = bmc3r(ofname, sd, t=t)
 		elif a == 7: #ABC pdr
 			asrt, sm, ar_tab, tt1 = pdr(ofname, t)
-		
-		# min_t = MAX_TIME
-		# if len(ar_tab.keys()) > 0:
-        # 	min_k = sorted(ar_tab.keys())[0]
-        # 	min_t =  ar_tab[min_k].to
 
 		ar_tab_old = self.engine_res[a]
 		for ky in ar_tab.keys():
@@ -139,7 +125,8 @@ class bandit:
 			ar_tab_old.update({ky:ar_tab[ky]})
 
 		self.engine_res[a] = ar_tab_old
-		MAX_mem = 0
+
+
 		if sm is not None:
 			# print(sm)
 			reward = 0
@@ -156,6 +143,7 @@ class bandit:
 					reward =  np.exp(1 - 0.4*sm.frame/MAX_FRAME - 0.6*sm.tt/MAX_TIME)
 			else:
 				#reward = sm.cla/(10000 * sm.to) if sm.to > 0 else sm.to
+
 				c1 = 1.0/MAX_MEM
 				c2 = 1.0/MAX_TIME
 				pen = t - sm.tt
@@ -164,15 +152,16 @@ class bandit:
 				for ky in ar_tab_old.keys():
 					tm = ar_tab_old[ky].to
 					mem = ar_tab_old[ky].mem
-					#reward += 2*np.exp(-c1*mem/(1+ky) - c2*tm/(1+ky))    
+					#reward += 2*np.exp(-c1*mem/(1+ky) - c2*tm/(1+ky))  
 					reward += (1*tm/(1+ky))
 					cn += 1
 				wa = reward/cn
-				reward = 2*np.exp(-wa)#(reward + np.exp(-pen/MAX_TIME))/cn
+				reward = 2*np.exp(-wa) #(reward + np.exp(-pen/MAX_TIME))/cn
+
 				if self.states > sm.frame:
 					reward = -1 * np.exp(t/MAX_TIME)
 		else:
-			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1,ld= sd)
+			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1, ld = sd)
 			if asrt > 0:
 				reward = asrt
 			else:
@@ -183,53 +172,48 @@ class bandit:
 
 	def run(self):
 		totalTime = 0
-		all_time = 0
 		seq = []
 		sm = None
-		next_to = -1
-		next_time = {}
-		# for i in self.iters:
-		#     next_time[i] = -1
-		for a in range(self.k):
-			time_outs.update({a:next_time})
-
+		asrt = -1
+		# next_to = -1
+		# next_time = {}
+		# # for i in self.iters:
+		# #     next_time[i] = -1
+		# for a in range(self.k):
+		# 	time_outs.update({a:next_time})
+		# frames = {}
 		def Next(d, a):
 			sd = d+1 if d > 0 else d  
 			# if a == 0:
 			# 	sd = d
 			return sd
-
-		frames = {}
+		all_time = 0
+		repeat_count = 2*self.k
 		count = 0
 		best_sd = 0
 		best = ()
-		end_frame = ()
-		asrt = -1
-
-		repeat_count = 2*self.k
-
 		enter_critical = False
 		exit_critical = True
 		critical = False
-
 		ocount = 0
 		ending = 0
+		ecount = 0
 		conf_begin_phase = 0
 		max_conf = 0
-		explore_count = 0
-		all_ending = 0
-
 		a = 0
-		ecount = 0
-		MAX_mem = 0
-		for i in range(4*self.iters):
+		self.explore = False
+		explore_count = 0
+		all_ending = False
 
+		end_frame = ()
+		MAX_mem = 0
+		for i in range(self.iters):
 			if all_ending or int(1.25*MAX_TIMEOUT - all_time) <= 0:		
-				end_frame = self.states, asrt, totalTime, seq, MAX_mem
+				end_frame = self.states, asrt, totalTime, seq, MAX_mem	
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime, 'all_time', all_time)
 				print('Stopping iteration -- all timeout')
 				break
-				
+
 			if int(TIMEOUT - totalTime) <= 0:
 				end_frame = self.states, asrt, totalTime, seq, MAX_mem
 				print('BMC-depth reached ', self.states, 'totalTime', totalTime)
@@ -238,45 +222,67 @@ class bandit:
 
 			print('Iteration {0} start ------'.format(i))
 
-			if i < (repeat_count):
+
+			a = self.pull(a, count)
+			if i < repeat_count or enter_critical:
+				# self.explore = True
 				a = i%(self.k)
 				print('exploring select', a)
-				if i > 0:
-					self.timeout[i] = self.timeout[i-1]
-				# if i%self.k == self.k-1:
-				# 	self.timeout[i] = self.timeout[i-1] * SC
-				# ocount += 1
+				# self.explore = True
+				# a = self.pull(a, 1)
+				#
+			if i < repeat_count:
+				self.timeout[i] = T
 			else:
-				if i > 1 and enter_critical:	
-					a = i%(self.k)
-					print('critical exploring select', a)
+				if i > 1 and enter_critical:
 					self.timeout[i] = self.timeout[i-1]
 					ocount += 1
 				else:
-					a = self.pull(a, count)
-					next_timeout = self.timeout[i-1] * SC
-					# self.timeout[i] = (self.timeout[i-1] * SC)#,  TIMEOUT - totalTime)#, 480)
-					# if sm and sm.to == -1 and count > int(M/2):
-					self.timeout[i] = next_timeout
-					# else:
+					if sm and sm.to == -1:
+						next_timeout = self.timeout[i-1] * SC
+						if count > 2:
+							self.timeout[i] = next_timeout
+							count = 0
+							#if self.timeout[i] >= 120:
+							if not enter_critical and i > repeat_count: #: #count > 3:
+								critical = True
+								print('blocker -- critical phase')
+							else:
+								if i < repeat_count and count > int(M/2):
+									critical = True
+									print('blocker -- critical phase')
 
-					if ending : #or self.timeout[i-1] > next_timeout > TIMEOUT - (totalTime + self.timeout[i]):
-						if ecount > self.k-1:
-							end_frame = self.states, asrt, totalTime, seq, MAX_mem
-							print('BMC-depth reached ', self.states, 'totalTime', totalTime)
-							print('Stopping iteration - condition with timeout ', next_timeout)
-							break
 						else:
-							ecount += 1
+							self.timeout[i] = self.timeout[i-1]
+							count = count + 1
+							print('Increment count', count, sm)
+							# self.explore = True
 
-				print('Calculating time out', self.timeout[i], 'total till now', totalTime)
+						if ending :
+							if ecount > self.k-1:
+								end_frame = self.states, asrt, totalTime, seq, MAX_mem
+								print('BMC-depth reached ', self.states, 'totalTime', totalTime)
+								print('ending -- Stopping iteration - condition with timeout ', next_timeout)
+								break
+							else:
+								ecount += 1
+						else:
+							self.timeout[i] = next_timeout #min(self.timeout[i-1] * SC, 480)
+							ecount = 0
+							# self.explore = False
+					else:
+						self.timeout[i] = self.timeout[i-1]
+						count = 0
+			  
+			print('Calculating time out', self.timeout[i], 'total till now', totalTime)
 
-				if self.timeout[i] > TIMEOUT - (totalTime + self.timeout[i]):
-					self.timeout[i] =  (TIMEOUT - totalTime) #self.timeout[i] +
-					ending = 1
-				else:
-					self.timeout[i] = min(self.timeout[i], TIMEOUT - totalTime)
-			
+			if self.timeout[i] > TIMEOUT - (totalTime + self.timeout[i]):
+				self.timeout[i] =  (TIMEOUT - totalTime) #self.timeout[i] +
+				ending = 1
+			else:
+				self.timeout[i] = min(self.timeout[i], TIMEOUT - totalTime)
+
+
 			if int(MAX_TIMEOUT - all_time) <= 0:		
 				a = self.pull(a, count=2)
 				self.timeout[i] = min(0.25*MAX_TIMEOUT, TIMEOUT - totalTime)
@@ -286,10 +292,8 @@ class bandit:
 				exit_critical = True
 				ocount = 0
 				#break
-				# if self.timeout[i] > 3000:
-				# 	self.stt
 
-			print('Next time out', self.timeout[i], 'for chosen action', a, Actions[a], 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'ending', ending)
+			print('Next time out', TIMEOUT, self.timeout[i], 'for chosen action', a, Actions[a], 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'ending', ending)
 
 			if self.timeout[i] < 1.0:
 				end_frame = self.states, asrt, totalTime, seq, MAX_mem
@@ -299,31 +303,18 @@ class bandit:
 
 			a, reward, sm, ar_tab = self.update_policy(a, self.timeout[i])
 
-			if sm :
-				if MAX_mem < sm.mem :
+			if sm:
+				if MAX_mem < sm.mem:
 					MAX_mem = sm.mem
 			# fragmentation
-			tt = math.ceil(sm.tt) #sm.tt if sm.asrt > 0 else self.timeout[i] #sm.tt if sm.asrt > 0  else math.ceil(sm.tt) # self.timeout[i]
+			tt =  math.ceil(sm.tt) #sm.tt if sm.asrt > 0 else self.timeout[i] #  else math.ceil(sm.tt) # self.timeout[i]
 
 			all_time += sm.tt if sm.asrt > 0 else self.timeout[i]
-
-			if not all_ending and sm and sm.to == -1:# and self.timeout[i] >= 120:
-				if not enter_critical and i > repeat_count:
-					critical = True # blocker 
-					print('blocker -- critical phase')
-				else:
-					if i < repeat_count:
-						count += 1
-						if count > int(M/2):
-							critical = True # blocker 
-							print('blocker -- critical phase')
-			else:
-				count = 0
-
+			
 			sd = self.states
 			if sm and reward > 0:
 				count = 0
-				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k, 'repeat_count', repeat_count, 'M', M)
+				print(i, 'sm', 'conf', sm.conf, 'cla', sm.cla, max(F*conf_begin_phase, 1e5), 'conf_begin_phase', conf_begin_phase, 'ocount', ocount, 'enter_critical', enter_critical, 'exit_critical', exit_critical, 'critical', critical, 'iter', (i+1)%self.k,'repeat_count', repeat_count, 'M', M)
 
 				sd = Next(sm.ld, a)
 				ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
@@ -341,7 +332,6 @@ class bandit:
 					if best_sd < sd:
 						best_sd = sd
 						best = ss
-
 					elif best_sd == sd:
 						if best[1] > sm.tt:
 							best_sd = sd
@@ -351,7 +341,8 @@ class bandit:
 					max_conf = max(max_conf, sm.cla)
 
 					print('------ exploring --', i, 'critical', critical, 'best_sd', best_sd, 'max_conf', max_conf)
-					if (i < repeat_count and i%self.k == self.k-1) or (enter_critical and ocount >= M-1) or (i < repeat_count and sm.asrt > 0) or (enter_critical and sm.asrt > 0):
+					if (i < repeat_count and i%self.k == self.k-1) or (enter_critical and ocount >= M-1) \
+					or (i < repeat_count and sm.asrt > 0) or (enter_critical and sm.asrt > 0):
 						# end of exploration --- pick the best one
 						print('------ at the end of exploration')
 						# sd = sm.frame+1 if sm.frame > 0 else sm.frame
@@ -361,21 +352,21 @@ class bandit:
 							ss = best #(Actions[a], tt, reward, totalTime, self.timeout[i], self.states)
 							seq.append(ss)
 							totalTime += tt
+						# else:
+						# 	increase_time = True
 						# if (i < repeat_count and i%self.k == self.k-1):
 						conf_begin_phase = max_conf
 
-				elif all_ending or (exit_critical and not enter_critical and i >= repeat_count): # exploitation 				
+				elif exit_critical and not enter_critical and i >= repeat_count: # exploitation 				
 					print('------ no exploration')
-					sd = Next(sm.ld, a) 
-					self.states = sd
+					 
+					self.states = Next(sm.ld, a)
 					ss = (Actions[a], tt, reward, totalTime, self.timeout[i], sd)
 					seq.append(ss)
 					totalTime += tt
 
 			else:
 				ss = (Actions[a], -1, reward, -1, self.timeout[i], sd)
-				if all_ending:
-					totalTime += tt
 
 
 			if critical and not enter_critical and i > repeat_count:
@@ -391,7 +382,6 @@ class bandit:
 				critical = False
 				print('----- Stopped exploring --', i, ocount)
 
-			
 			self.reward[i] = self.mean_reward
 
 			# if sm and sm.to > 0 and reward > 0:
@@ -400,13 +390,12 @@ class bandit:
 			print('#### iter ', i, Actions[a], 'time taken', tt, self.timeout[i], 'totalTime', totalTime, 'ss', ss, sm)
 
 			print('Iteration {0} end ------'.format(i))
-
 			# self.timeout[i] = T
 			if sm and sm.asrt > 0:
 				asrt = sm.asrt
 				end_frame = self.states, asrt, totalTime, seq, MAX_mem
 				print('Output asserted at frame ', sm.asrt, 'tt', tt, 'totalTime', totalTime)
-				print('Stopping iteration')
+				print('Stopping iteration -- assert')
 				break
 
 		# while i < self.iters:
@@ -458,22 +447,33 @@ class eps_bandit(bandit):
 		if self.eps == 0 and self.n == 0:
 			ap = [1,2,4]
 			a = np.random.choice(ap)
-			print('selection - cond1',a, p, self.n, self.eps, a1, count)
+
+			print('selection - cond1',a, p, self.n, self.eps, a1, 'count', count, self.explore)
 		if count > 0:
 			ap = []
 			for i in range(self.k):
 				if not(i == a1):
 					ap.append(i)
 			a = np.random.choice(ap)
-			print('selection - cond2',a, p, self.n, self.eps, a1, count)
-		elif p < self.eps:
+
+			print('selection - cond2',a, p, self.n, self.eps, a1, 'count', count, self.explore)
+		elif self.explore and p < self.eps :
 			# Randomly select an action
 			a = np.random.choice(self.k)
-			print('selection - cond3',a, p, self.n, self.eps, a1, count)
+			# if count > 0:
+			# 	ap = []
+			# 	for i in range(self.k):
+			# 		if not(i == a1):
+			# 			ap.append(i)
+			# 	a = np.random.choice(ap)
+
+			print('selection - cond3',a, p, self.n, self.eps, a1, 'count',count, self.explore)
 		else:
 			# Take greedy action
 			a = np.argmax(self.k_reward)
-			print('selection - cond4',a, p, self.n, self.eps, a1, count)
+
+			print('selection - cond4',a, p, self.n, self.eps, a1, 'count',count, self.explore)
+
 		return a
 
 	def update_policy(self, a, t):
@@ -495,7 +495,7 @@ class eps_bandit(bandit):
 			self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) * self.alpha
 
 		# if a >0:
-		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, self.k_reward))
+		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, [rk for rk in self.k_reward]))
 		return a, reward, sm, ar_tab
 		
    
@@ -526,7 +526,7 @@ class eps_decay_bandit(bandit):
 		if self.n == 0:
 			ap = [1,2,4]
 			a = np.random.choice(ap)
-		elif count > 0:
+		if count > 0:
 			ap = []
 			for i in range(self.k):
 				if not(i == a1):
@@ -560,7 +560,7 @@ class eps_decay_bandit(bandit):
 			self.k_reward[a] = self.k_reward[a] + (reward - self.k_reward[a]) * self.alpha
 
 		# if a >0:
-		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, self.k_reward))
+		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, [rk for rk in self.k_reward]))
 		return a, reward, sm, ar_tab
 	   
 class ucb1_bandit(bandit):
@@ -610,7 +610,7 @@ class ucb1_bandit(bandit):
 		
 		self.k_ucb_reward = self.k_reward + self.c * np.sqrt((np.log(self.n)) / self.k_n)
 
-		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, self.k_ucb_reward))
+		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, [rk for rk in self.k_ucb_reward]))
 
 		return a, reward, sm, ar_tab
 	
@@ -634,9 +634,9 @@ def main(argv):
 
 	fname = (inputfile.split('/')[-1]).split('.')[0]
 	print(fname)
-	filename = "plots_IF/MAB_BMC_results_fixt_IF_{0}_{1}.csv".format(TIMEOUT, fname)
-	# # header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
-	# # writing to csv file 
+	filename = "plots_IF/MAB_BMC_results_n_IF_{0}_{1}.csv".format(TIMEOUT, fname)
+	# header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
+	# writing to csv file 
 	# with open(filename, 'w+') as csvfile: 
 	# 	print('filename', inputfile)
 
@@ -675,11 +675,12 @@ def main(argv):
 	# options = [ eps_01, eps_1_alpha, eps_decay, ucb1, o_eps_01]
 	# labels = [ r'$\epsilon=0.4$', r'$\epsilon=0.1, \alpha = {0}$'.format(alpha), r'$\epsilon-decay$', 'ucb1', r'opt $\epsilon=0.01$' ]
 
-	options = [eps_high_alpha]
-	labels = [r'$erwa$'.format(alpha)]
+	options = [ucb1]
+	labels = ['ucb1']
+
 
 	if PLOT:
-		pp = PdfPages("plots_IF/plot_MAB_BMC_fixn_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
+		pp = PdfPages("plots_IF/plot_MAB_BMC_N_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
 	j = 0
 	all_rewards = []
 	all_selection = []
@@ -722,7 +723,9 @@ def main(argv):
 			pp.savefig(fig1)   
 
 		j += 1
-		# plt.show() 
+		# plt.show()
+
+		
 		etime = time.time()
 		# displaying the memory
 		current, peak = tracemalloc.get_traced_memory()
@@ -734,10 +737,8 @@ def main(argv):
 		all_times.append((etime-stime, current/(1024*1024), peak/(1024*1024)))
 	print('-------------------------------------------')
 	print()
-	print('Bandit policy: \t BMC depth \t time \t sequence')
-
 	rows  = []
-	
+
 	rows.append(['Design', 'Bandit-policy','BMC-depth', 'status', 'time(s)', 'total(s)', 'memory-current(MB)', 'memory-peak MB)', 'MAX-mem(BMC)(MB)', 'sequence'])
 	print('Bandit policy: \t BMC depth \t time \t sequence')
 	
@@ -777,18 +778,18 @@ def main(argv):
 		# plt.title("Average Rewards after " + str(episodes)  + " Episodes")
 		plt.legend()
 		pp.savefig(fig3)
-
+	
 		pp.close()
 
 	opt_per = np.array(all_selection)/ iters * 100
 	df = pd.DataFrame(opt_per, index=labels, columns=[Actions[x] for x in range(0, k)])
 	print("Percentage of actions selected:")
 	print(df)
-	
 
 	with open(filename, 'a+') as csvfile: 
 		csvwriter = csv.writer(csvfile) 
 		csvwriter.writerows(rows)
+
 
 	
 if __name__ == "__main__":

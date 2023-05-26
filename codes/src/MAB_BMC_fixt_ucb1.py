@@ -133,7 +133,7 @@ class bandit:
 		ar_tab_old = self.engine_res[a]
 		for ky in ar_tab.keys():
 			sm1 = ar_tab[ky]
-			if sm1.frame > sm1.ld+1:
+			if sm1 and sm1.frame > sm1.ld+1:
 				sm = sm1
 				break
 			ar_tab_old.update({ky:ar_tab[ky]})
