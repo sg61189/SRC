@@ -30,7 +30,7 @@ MAX_FRAME = 1e9
 MAX_CLAUSE = 1e9
 MAX_TIME = 3600
 MAX_MEM = 2000
-MAX_TIMEOUT = 2*MAX_TIME
+MAX_TIMEOUT = 4*MAX_TIME
 F = 3
 
 time_outs = {}
@@ -130,14 +130,14 @@ class bandit:
         # 	min_k = sorted(ar_tab.keys())[0]
         # 	min_t =  ar_tab[min_k].to
 
-		ar_tab_old = self.engine_res[a]
-		for ky in ar_tab.keys():
-			sm1 = ar_tab[ky]
-			if sm1 and  sm1.frame > sd:
-				sm = sm1
-				ar_tab_old.update({ky:sm})
+		# ar_tab_old = self.engine_res[a]
+		# for ky in ar_tab.keys():
+		# 	sm1 = ar_tab[ky]
+		# 	if sm1 and  sm1.frame > sd:
+		# 		sm = sm1
+		# 		ar_tab_old.update({ky:sm})
 
-		self.engine_res[a] = ar_tab_old
+		# self.engine_res[a] = ar_tab_old
 		MAX_mem = 0
 		if sm is not None:
 			# print(sm)
@@ -160,16 +160,16 @@ class bandit:
 				pen = t - sm.tt
 				reward = 0
 				cn = 0
-				for ky in ar_tab_old.keys():
-					tm = ar_tab_old[ky].to
-					mem = ar_tab_old[ky].mem
+				for ky in ar_tab.keys():
+					tm = ar_tab[ky].to
+					mem = ar_tab[ky].mem
 					#reward += 2*np.exp(-c1*mem/(1+ky) - c2*tm/(1+ky))    
 					reward += (1*tm/(1+ky))
 					cn += 1
 				wa = reward/cn
 				reward = 2*np.exp(-wa)#(reward + np.exp(-pen/MAX_TIME))/cn
 
-				if sd > sm.frame:
+				if sd > sm.ld:
 					reward = -1 * np.exp(t/MAX_TIME)
 		else:
 			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1,ld= sd)
@@ -179,7 +179,7 @@ class bandit:
 				reward = -1 * np.exp(t/MAX_TIME) #np.log(t)
 		print(sd, sm.frame, reward, sm)
 
-		return reward, sm, ar_tab_old
+		return reward, sm
 
 	def run(self):
 		totalTime = 0
@@ -297,7 +297,7 @@ class bandit:
 				print('Stopping iteration - condition with timeout < ', 1.0)
 				break
 
-			a, reward, sm, ar_tab = self.update_policy(a, self.timeout[i])
+			a, reward, sm = self.update_policy(a, self.timeout[i])
 
 			if sm :
 				if MAX_mem < sm.mem :
@@ -479,7 +479,7 @@ class eps_bandit(bandit):
 	def update_policy(self, a, t):
 		# Execute the action and calculate the reward
 		# mem_use, tm = memory_usage(self.get_reward(a))
-		reward, sm, ar_tab = self.get_reward(a, t)
+		reward, sm = self.get_reward(a, t)
 		
 		# Update counts
 		self.n += 1
@@ -496,7 +496,7 @@ class eps_bandit(bandit):
 
 		# if a >0:
 		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, self.k_reward))
-		return a, reward, sm, ar_tab
+		return a, reward, sm
 		
    
 class eps_decay_bandit(bandit):
@@ -543,7 +543,7 @@ class eps_decay_bandit(bandit):
 	def update_policy(self, a, t):
 		# Execute the action and calculate the reward
 		# mem_use, tm = memory_usage(self.get_reward(a))
-		reward, sm, ar_tab = self.get_reward(a, t)
+		reward, sm = self.get_reward(a, t)
 		
 		# Update counts
 		self.n += 1
@@ -561,7 +561,7 @@ class eps_decay_bandit(bandit):
 
 		# if a >0:
 		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, self.k_reward))
-		return a, reward, sm, ar_tab
+		return a, reward, sm
 	   
 class ucb1_bandit(bandit):
 	'''
@@ -593,7 +593,7 @@ class ucb1_bandit(bandit):
 
 	def update_policy(self, a, t):
 		# Execute the action and calculate the reward
-		reward, sm, ar_tab = self.get_reward(a, t) #np.random.normal(self.mu[a], 1)
+		reward, sm = self.get_reward(a, t) #np.random.normal(self.mu[a], 1)
 		
 		# Update counts
 		self.n += 1
@@ -612,7 +612,7 @@ class ucb1_bandit(bandit):
 
 		print('Action {0} reward {1}, All Reward {2}'.format(a, reward, self.k_ucb_reward))
 
-		return a, reward, sm, ar_tab
+		return a, reward, sm
 	
 def main(argv):
 	
