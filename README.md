@@ -125,8 +125,10 @@ Codebase: https://ycunxi.github.io/cunxiyu/
 
 Talk: https://www.youtube.com/watch?v=EPcn5ttp1TM
 
+Online RL in Jasper : https://community.cadence.com/cadence_blogs_8/b/breakfast-bytes/posts/jasperml?CMP=NA_EM_MKTO_1119&mkt_tok=eyJpIjoiWVRaaVpqa3pPR0kwTmpFNSIsInQiOiI5N3JOZzNDWjAxbnczZVAzdEhOelFCNnRxd2RjSm94R2JwRWhvQ1hzSmllbFBaV3pVQzltc1RteFYzbklnaUVFRVwvaldOYWwwY2lRRENBNEpVUVBrRlZDZitIRmZLOUtLN0h3d3VaUXpHYzk3S3RFMWxBejd5MnM4TjY2U3hCNjcifQ%3D%3D
 
-Steps to install ABC is as follows:
+
+Steps to install ABC are as follows:
 ----------------------------------------------
 
 Download the zip from here: https://github.com/berkeley-abc/abc and unzip.
@@ -134,7 +136,7 @@ $> cd abc-master
 $> make
 $> abc
 
-Once ABC is installed, the last command should open the ABC command prompt.  We can read the aig files and generate the corresponding verilog files as follows:
+Once ABC is installed, the last command should open the ABC command prompt.  We can read the aig files and generate the corresponding Verilog files as follows:
 
 abc 01> read 6s7.aig; write_verilog 6s7.v
 
