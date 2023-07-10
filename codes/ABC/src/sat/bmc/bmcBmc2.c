@@ -864,9 +864,16 @@ int Saig_BmcPerform( Aig_Man_t * pAig, int nStart, int nFramesMax, int nNodesMax
         RetValue = Saig_BmcSolveTargets( p, nStart, &nOutsSolved );
         if ( fVerbose )
         {
-            printf( "%4d : F =%5d. O =%4d.  And =%8d. Var =%8d. Conf =%7d. ", 
+            // [DG 04/07/2023]
+            // printf( "%4d : F =%5d. O =%4d.  And =%8d. Var =%8d. Conf =%7d. ", 
+            //     Iter, p->iFrameLast, p->iOutputLast, Aig_ManNodeNum(p->pFrm), p->nSatVars, 
+            //     p->pSat ? (int)p->pSat->stats.conflicts : satoko_conflictnum(p->pSat2) );  
+            printf( "%4d : F =%5d. O =%4d.  And =%8d. Var =%8d. Conf =%7d.  Cla =%7d. Learn =%7d.", 
                 Iter, p->iFrameLast, p->iOutputLast, Aig_ManNodeNum(p->pFrm), p->nSatVars, 
-                p->pSat ? (int)p->pSat->stats.conflicts : satoko_conflictnum(p->pSat2) );   
+                p->pSat ? (int)p->pSat->stats.conflicts : satoko_conflictnum(p->pSat2),
+                p->pSat ? (int)p->pSat->stats.clauses : satoko_clausenum(p->pSat2),
+                p->pSat ? (int)p->pSat->stats.learnts : satoko_learntnum(p->pSat2) );   
+             
             printf( "%4.0f MB",     4.0*(p->iFrameLast+1)*p->nObjs/(1<<20) );
             printf( "%9.2f sec", (float)(Abc_Clock() - clkTotal)/(float)(CLOCKS_PER_SEC) );
             printf( "\n" );
