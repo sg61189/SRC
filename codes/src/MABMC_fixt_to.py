@@ -314,7 +314,7 @@ class bandit:
 						max_next_to = next_to
 				if i > 1 and enter_critical:			
 					a = self.pull(av, count=1)
-					print('exploring select', a, Actions[a], 'already explored', a1)
+					print('exploring select', a, Actions[a], 'already explored', av)
 					self.timeout[i] = self.timeout[i-1]*SC if max_next_to < 0 else max_next_to
 
 					self.frameout[i] = 0 #-1
