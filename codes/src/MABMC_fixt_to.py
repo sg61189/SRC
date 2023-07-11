@@ -275,10 +275,10 @@ class bandit:
 		explore_count = 0
 		all_ending = 0
 
-		a1 = 0
+		a1 = []
 		ecount = 0
 		MAX_mem = 0
-		M = 3
+		M = int(2*self.k/3.0)
 		for i in range(4*self.iters):
 
 			if all_ending or int(1.25*MAX_TIMEOUT - all_time) <= 0:		
@@ -314,12 +314,14 @@ class bandit:
 						max_next_to = next_to
 				if i > 1 and enter_critical:			
 					a = self.pull(a1, count=1)
-					print('exploring select', a, Actions[a])
+					print('exploring select', a, Actions[a], 'already explored', a1)
 					self.timeout[i] = self.timeout[i-1]*SC if max_next_to < 0 else max_next_to
 
 					self.frameout[i] = 0 #-1
 					if ocount == 0:
-						a1 = a
+						a1 = [a]
+					else:
+						a1.append(a)
 
 					ocount += 1
 					count = 0
@@ -579,7 +581,7 @@ class eps_bandit(bandit):
 		if count > 0:
 			ap = []
 			for i in range(self.k):
-				if not(i == a1):
+				if not(i in a1):
 					ap.append(i)
 			weights = [self.k_reward[i]/(np.sum(self.k_reward)) for i in ap]
 			a = random.choices(ap, weights=weights, k=1)[0]
@@ -648,7 +650,7 @@ class eps_decay_bandit(bandit):
 		elif count > 0:
 			ap = []
 			for i in range(self.k):
-				if not(i == a1):
+				if not(i in a1):
 					ap.append(i)
 			weights = [self.k_reward[i]/(np.sum(self.k_reward)) for i in ap]
 			a = random.choices(ap, weights=weights, k=1)[0]
