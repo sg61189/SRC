@@ -275,7 +275,7 @@ class bandit:
 		explore_count = 0
 		all_ending = 0
 
-		a1 = []
+		av = []
 		ecount = 0
 		MAX_mem = 0
 		M = int(2*self.k/3.0)
@@ -313,22 +313,22 @@ class bandit:
 					if max_next_to < next_to:
 						max_next_to = next_to
 				if i > 1 and enter_critical:			
-					a = self.pull(a1, count=1)
+					a = self.pull(av, count=1)
 					print('exploring select', a, Actions[a], 'already explored', a1)
 					self.timeout[i] = self.timeout[i-1]*SC if max_next_to < 0 else max_next_to
 
 					self.frameout[i] = 0 #-1
 					if ocount == 0:
-						a1 = [a]
+						av = [a]
 					else:
-						a1.append(a)
+						av.append(a)
 
 					ocount += 1
 					count = 0
 				else:
 					count += 1
 					ocount = 0
-					a = self.pull(a1, count=0)
+					a = self.pull(av, count=0)
 					print('exploiting select', a, Actions[a])
 					next_timeout = self.timeout[i-1] 
 
@@ -338,7 +338,7 @@ class bandit:
 
 					if sm and sm.to == -1:
 						next_timeout = self.timeout[i-1] * SC
-					a1 = a
+					av = [a]
 					self.timeout[i] = next_timeout
 
 					# next_timeout = self.timeout[i-1] * SC
