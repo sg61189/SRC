@@ -129,7 +129,7 @@ class bandit:
 			print('Prediction for action', a, Actions[a], next_tm, ndt)
 		return next_tm, ndt
 
-	def cal_reward(self, a, sm, t, asrt, sd, ed = -1):
+	def cal_reward(self, a, sm, t, asrt, tt1, sd, ed = -1):
 		ar_tab_old = self.engine_res[a]
 		MAX_mem = 0
 		if sm is not None:
@@ -160,7 +160,7 @@ class bandit:
 						#reward += 2*np.exp(-c1*mem/(1+ky) - c2*tm/(1+ky))    
 						reward += (1*tm/(1+ky))
 						cn += 1
-				wa = reward/cn
+				wa = (reward/cn) if cn > 0 else 0
 
 				nt, nd = self.get_next_time(a, sm.ld)
 				print('In reward', sd, sm.frame, nt, nd)
@@ -177,7 +177,9 @@ class bandit:
 				reward = asrt
 			else:
 				reward = -1 * np.exp(t/MAX_TIME) #np.log(t)
-		return reward
+
+		print(sd, sm.frame, reward, sm)
+		return reward, sm
 
 	def get_reward(self, a, t1 = -1):
 
@@ -238,9 +240,8 @@ class bandit:
 				ar_tab_old.update({ky:sm})
 
 		self.engine_res[a] = ar_tab_old
-		reward = self.cal_reward(a, sm, t, asrt, sd)
+		reward, sm = self.cal_reward(a, sm, t, asrt, tt1, sd)
 		
-		print(sd, sm.frame, reward, sm)
 		#todo: clean up the directory and store it in a file
 		# for k in list(ar_tab_old):
 		#     v = ar_tab_old[k]
