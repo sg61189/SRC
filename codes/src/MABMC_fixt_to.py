@@ -76,6 +76,9 @@ class bandit:
 		#for i in range(iters):
 		self.timeout[0] = To1[0]
 		self.frameout = np.zeros(iters)
+
+		fn = (fname.split('/')[-1]).split('.')[0]
+		self.csvfilename = 'plots/BMC_time_dist_{0}.csv'.format(fn)
 		
 		self.engine_res = [{} for i in range(k)]
 
@@ -98,7 +101,8 @@ class bandit:
 
 		# if len(frames) > 10:
 		#     ftrain, ttrain = frames[-11:], time_outs[-11:]
-		print('Training for action', a, nd, len(ftrain), len(ttrain), len(ttrain1))
+		if flag:
+			print('Training for action', a, nd, len(ftrain), len(ttrain), len(ttrain1))
 		# print('Training data', (ftrain), (ttrain), (ttrain1))
 		next_tm = -1 #self.timeout[i]*SC
 		ndt = -1
@@ -121,8 +125,59 @@ class bandit:
 				next_tm = np.max(new_to) #np.sum(new_to)
 				ndt += 1
 			# print('Prediction', new_frames, new_cla, new_to)
-		print('Prediction for action', a, Actions[a], next_tm, ndt)
+		if flag:
+			print('Prediction for action', a, Actions[a], next_tm, ndt)
 		return next_tm, ndt
+
+	def cal_reward(self, a, sm, t, asrt, sd, ed = -1):
+		ar_tab_old = self.engine_res[a]
+		MAX_mem = 0
+		if sm is not None:
+			# print(sm)
+			reward = 0
+			if DIFF == 0 :
+				reward = (sm.frame - sd)
+			elif DIFF == 1:
+				reward = sm.frame
+			elif DIFF == 2:
+				pen = t - sm.tt
+				reward =  np.exp(2*sm.frame/MAX_FRAME - 0.5*sm.mem/MAX_MEM - 0.6*sm.tt/MAX_TIME)
+				# + 0.1*sm.cla/MAX_CLAUSE 
+				#np.exp(0.5*sm.frame/MAX_FRAME + 0.1*sm.cla/MAX_CLAUSE - 0.3*sm.to/MAX_TIME) #-  0.1*pen/MAX_TIME)
+				if asrt > 0:
+					reward =  np.exp(1 - 0.4*sm.frame/MAX_FRAME - 0.6*sm.tt/MAX_TIME)
+			else:
+				#reward = sm.cla/(10000 * sm.to) if sm.to > 0 else sm.to
+				c1 = 1.0/MAX_MEM
+				c2 = 1.0/MAX_TIME
+				pen = t - sm.tt
+				reward = 0
+				cn = 0
+				for ky in ar_tab_old.keys():
+					if (ed > -1 and sd <= ky <= ed) or sd <= ky:
+						tm = ar_tab_old[ky].to
+						mem = ar_tab_old[ky].mem
+						#reward += 2*np.exp(-c1*mem/(1+ky) - c2*tm/(1+ky))    
+						reward += (1*tm/(1+ky))
+						cn += 1
+				wa = reward/cn
+
+				nt, nd = self.get_next_time(a, sm.ld)
+				print('In reward', sd, sm.frame, nt, nd)
+
+				reward = np.exp(-0.4*wa)  # + nd/nt)#(reward + np.exp(-pen/MAX_TIME))/cn
+				if sd > 0:
+					reward += np.exp(0.2*(ky-sd)/(1+sd)) # total number of frames explored --> more frames more reward
+					reward += np.exp(-0.2*nt/nd) if (nt > -1 and nd > 0 and not math.isnan(nt)) else 0 # reward based on future prediction
+				if sd > sm.frame:
+					reward = -0.2 * np.exp(t/MAX_TIME) # no exploration --> penalty
+		else:
+			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1,ld= sd)
+			if asrt > 0:
+				reward = asrt
+			else:
+				reward = -1 * np.exp(t/MAX_TIME) #np.log(t)
+		return reward
 
 	def get_reward(self, a, t1 = -1):
 
@@ -183,58 +238,17 @@ class bandit:
 				ar_tab_old.update({ky:sm})
 
 		self.engine_res[a] = ar_tab_old
-		MAX_mem = 0
-		if sm is not None:
-			# print(sm)
-			reward = 0
-			if DIFF == 0 :
-				reward = (sm.frame - sd)
-			elif DIFF == 1:
-				reward = sm.frame
-			elif DIFF == 2:
-				pen = t - sm.tt
-				reward =  np.exp(2*sm.frame/MAX_FRAME - 0.5*sm.mem/MAX_MEM - 0.6*sm.tt/MAX_TIME)
-				# + 0.1*sm.cla/MAX_CLAUSE 
-				#np.exp(0.5*sm.frame/MAX_FRAME + 0.1*sm.cla/MAX_CLAUSE - 0.3*sm.to/MAX_TIME) #-  0.1*pen/MAX_TIME)
-				if asrt > 0:
-					reward =  np.exp(1 - 0.4*sm.frame/MAX_FRAME - 0.6*sm.tt/MAX_TIME)
-			else:
-				#reward = sm.cla/(10000 * sm.to) if sm.to > 0 else sm.to
-				c1 = 1.0/MAX_MEM
-				c2 = 1.0/MAX_TIME
-				pen = t - sm.tt
-				reward = 0
-				cn = 0
-				for ky in ar_tab_old.keys():
-					tm = ar_tab_old[ky].to
-					mem = ar_tab_old[ky].mem
-					#reward += 2*np.exp(-c1*mem/(1+ky) - c2*tm/(1+ky))    
-					reward += (1*tm/(1+ky))
-					cn += 1
-				wa = reward/cn
-
-				nt, nd = self.get_next_time(a, sm.ld)
-				print('In reward', sd, sm.frame, nt, nd)
-
-				reward = np.exp(-0.4*wa)  # + nd/nt)#(reward + np.exp(-pen/MAX_TIME))/cn
-				if sd > 0:
-					reward += np.exp(0.2*(ky-sd)/(1+sd)) # total number of frames explored --> more frames more reward
-					reward += np.exp(-0.2*nt/nd) if (nt > -1 and nd > 0 and not math.isnan(nt)) else 0 # reward based on future prediction
-				if sd > sm.frame:
-					reward = -0.2 * np.exp(t/MAX_TIME) # no exploration --> penalty
-
-		else:
-			sm =  abc_result(frame=sd, conf=0, var=0, cla=0, mem = -1, to=-1, asrt = asrt, tt = tt1,ld= sd)
-			if asrt > 0:
-				reward = asrt
-			else:
-				reward = -1 * np.exp(t/MAX_TIME) #np.log(t)
+		reward = self.cal_reward(a, sm, t, asrt, sd)
+		
 		print(sd, sm.frame, reward, sm)
 		#todo: clean up the directory and store it in a file
 		# for k in list(ar_tab_old):
 		#     v = ar_tab_old[k]
 		#     if not v:
 		#         del ar_tab_old[k]
+
+		# ft_vs_pt = {}/
+
 		return reward, sm
 
 	def run(self):
@@ -369,7 +383,7 @@ class bandit:
 					self.timeout[i] = min(self.timeout[i], TIMEOUT - totalTime)
 			
 			if int(MAX_TIMEOUT - all_time) <= 0:		
-				a = self.pull(a, count=2)
+				a = self.pull(av, count=2)
 				self.timeout[i] = min(0.25*MAX_TIMEOUT, TIMEOUT - totalTime)
 				print('More than {0} hrs spent in learning --- closing iterations now'.format(MAX_TIMEOUT/TIMEOUT))
 				all_ending = True
@@ -392,6 +406,51 @@ class bandit:
 			# 	a, reward, sm = self.update_policy(a, (TIMEOUT - totalTime))
 			# else:
 			a, reward, sm = self.update_policy(a, self.timeout[i])
+
+			rows = []
+			with open(self.csvfilename, 'a+') as csvfile: 
+				# creating a csv writer object 
+				csvwriter = csv.writer(csvfile) 
+				# for a in range(k):
+				ar_tab_old = self.engine_res[a]
+
+				#frame=sd, conf=0, var=0, cla=0, mem = -1, to
+				for ky in ar_tab_old.keys():
+
+					row = []
+					frame = ar_tab_old[ky].frame
+					cla = ar_tab_old[ky].cla
+					conf = ar_tab_old[ky].conf
+					var = ar_tab_old[ky].var
+					tm = ar_tab_old[ky].to
+					mem = ar_tab_old[ky].mem
+
+					nt, nd =  self.get_next_time(a, sm.ld)
+					if self.states <= ky: 
+						row.append(Actions[a])
+						# row.append(fname)
+						row.append(frame)
+						row.append(cla)
+						row.append(conf)
+						row.append(var)
+						row.append(tm)
+						row.append(mem)
+						row.append(nt)
+						row.append(nd)
+						pt = 0
+						if nd == -1:
+							pt = -1
+							# row.append(-1)
+						else:
+							pt = nt/nd
+						row.append(pt)
+						row.append(reward)
+
+						# ft_vs_pt.update({frame:(tm, pt)})
+					if len(row) > 0:
+						rows.append(row)
+				if len(rows) > 0:
+					csvwriter.writerows(rows)
 
 			if sm :
 				if MAX_mem < sm.mem :
