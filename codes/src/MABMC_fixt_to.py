@@ -1,5 +1,5 @@
 import numpy as np 
-PLOT = False
+PLOT = True
 if PLOT:
 	import matplotlib.pyplot as plt 
 	from matplotlib.backends.backend_pdf import PdfPages
@@ -35,7 +35,7 @@ MAX_TIMEOUT = 4*MAX_TIME
 F = 3
 
 time_outs = {}
-Actions = ['bmc2', 'bmc3', 'bmc3s', 'bmc3j', 'bmc3g', 'bmcu', 'bmc3r', 'pdr']
+Actions = ['bmc2', 'bmc3', 'bmc3s', 'bmc3g', 'bmcu', 'bmc3r', 'bmc3j2', 'bmc3j3', 'bmc3j4'] # 'pdr']
 To1 = []
 st = 30
 tot = 0
@@ -216,16 +216,19 @@ class bandit:
 			asrt, sm, ar_tab, tt1 = bmc3(ofname, sd,  t=t, f=f)
 		elif a == 2: #ABC bmc3rs
 			asrt, sm, ar_tab, tt1 = bmc3rs(ofname, sd,  t=t, f=f)
-		elif a == 3: #ABC bmc3j
-			asrt, sm, ar_tab, tt1 = bmc3j(ofname, sd,  t=t, f=f)
-		elif a == 4: #ABC bmc3g
+		elif a == 3: #ABC bmc3g
 			asrt, sm, ar_tab, tt1 = bmc3rg(ofname, sd,  t=t, f=f)
-		elif a == 5: #ABC bmc3u
+		elif a == 4: #ABC bmc3u
 			asrt, sm, ar_tab, tt1 = bmc3ru(ofname, sd,  t=t, f=f)
-		elif a == 6: #ABC bmc3r
+		elif a == 5: #ABC bmc3r
 			asrt, sm, ar_tab, tt1 = bmc3r(ofname, sd,  t=t, f=f)
-		elif a == 7: #ABC pdr
-			asrt, sm, ar_tab, tt1 = pdr(ofname, t)
+		elif a == 6: #ABC bmc3j=2
+			asrt, sm, ar_tab, tt1 = bmc3j(ofname, sd, j = 2,  t=t, f=f)
+		elif a == 7: #ABC bmc3j=3
+			asrt, sm, ar_tab, tt1 = bmc3j(ofname, sd, j = 3, t=t, f=f)
+		elif a == 8: #ABC bmc3j=4
+			asrt, sm, ar_tab, tt1 = bmc3j(ofname, sd, j = 4, t=t, f=f)
+			#asrt, sm, ar_tab, tt1 = pdr(ofname, t)
 		
 		# min_t = MAX_TIME
 		# if len(ar_tab.keys()) > 0:
@@ -826,7 +829,7 @@ def main(argv):
 	# with open(filename, 'w+') as csvfile: 
 	# 	print('filename', inputfile)
 
-	k = 7 # arms
+	k = M # arms
 	iters = 1000 #int((TIMEOUT/T)) 
 	#iters = int(np.log((TIMEOUT/T)*(SC-1) +1)/(np.log(SC))) + 1 # time-steps
 	episodes = 1 #episodes
