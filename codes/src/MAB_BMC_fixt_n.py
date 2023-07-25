@@ -634,7 +634,7 @@ def main(argv):
 
 	fname = (inputfile.split('/')[-1]).split('.')[0]
 	print(fname)
-	filename = "plots_IF/MAB_BMC_results_fixt_IF_{0}_{1}.csv".format(TIMEOUT, fname)
+	filename = "results_MC/MAB_BMC_results_fixt_IF_{0}_{1}.csv".format(TIMEOUT, fname)
 	# # header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
 	# # writing to csv file 
 	# with open(filename, 'w+') as csvfile: 
@@ -679,7 +679,7 @@ def main(argv):
 	labels = [r'$erwa$'.format(alpha), 'ucb1']
 
 	if PLOT:
-		pp = PdfPages("plots_IF/plot_MAB_BMC_fixn_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
+		pp = PdfPages("results_MC/plot_MAB_BMC_fixn_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
 	j = 0
 	all_rewards = []
 	all_selection = []

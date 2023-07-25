@@ -525,7 +525,7 @@ class eps_decay_bandit(bandit):
 		if self.n == 0:
 			ap = [1,2,4]
 			a = np.random.choice(ap)
-		if count > 0:
+		elif count > 0:
 			ap = []
 			for i in range(self.k):
 				if not(i == a1):
@@ -633,7 +633,7 @@ def main(argv):
 
 	fname = (inputfile.split('/')[-1]).split('.')[0]
 	print(fname)
-	filename = "plots_IF/MAB_BMC_results_n_IF_{0}_{1}.csv".format(TIMEOUT, fname)
+	filename = "results_MC/MAB_BMC_results_n_IF_{0}_{1}.csv".format(TIMEOUT, fname)
 	# header = ['Design', 'Frame', 'Clauses', 'Mem', 'time']
 	# writing to csv file 
 	# with open(filename, 'w+') as csvfile: 
@@ -679,7 +679,7 @@ def main(argv):
 
 
 	if PLOT:
-		pp = PdfPages("plots_IF/plot_MAB_BMC_N_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
+		pp = PdfPages("results_MC/plot_MAB_BMC_N_IF_{0}_{1}{2}.pdf".format(fname, DIFF, '_FIX' if DIFF else ''))
 	j = 0
 	all_rewards = []
 	all_selection = []
