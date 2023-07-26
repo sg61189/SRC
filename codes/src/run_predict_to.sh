@@ -14,7 +14,7 @@
 #&&
 # 
 
-ile='6s_seq_predict.txt'
+file='6s_seq_predict.txt'
 to=3600
 i=1
 while read line; do

@@ -480,6 +480,8 @@ class bandit:
 			all_time += tp #sm.tt if sm.asrt > 0 else tp
 
 			sd = self.states
+
+			ss = (Actions[a], tp, reward, totalTime, self.timeout[i], sd)
 			if blocker(sm, i):
 				explore = True
 
