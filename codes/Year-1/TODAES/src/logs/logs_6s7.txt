@@ -1,0 +1,6 @@
+Input file is : benchmark/HWMCC15/6s7.aig
+iters 11
+6s7
+---------------- Running bandit $\epsilon=0$ ------------------
+---- episodes  0
+../benchmark/HWMCC15/6s7.aig ../benchmark/HWMCC15/6s7_n.aig
