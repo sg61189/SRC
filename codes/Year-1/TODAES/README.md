@@ -8,6 +8,8 @@ Installation:
 Some modifications in ABC output for logs regrading conflict clauses (needs to compile the source codes)
 >> cd ABC
 
+>> make clean
+
 >> make all
 
 
