@@ -1,11 +1,26 @@
 
-1. MAB using ABC: python MAB_eg_ABC.py -i benchmark/HWMCC15/6s7.aig
-2. Different MAB policies with different BMC option in ABC: python3 MAB_BMC.py -i benchmark/HWMCC_15_17/6s7.aig 
-3. Updated MAB-BMC code: python3 MAB_BMC_new.py -i benchmark/HWMCC_15_17/6s7.aig 
 
 Installation:
 - Python packages:
  scipy, numpy, matplotlib, pandas, scikit-learn
 - ABC 
 
+
+----------------- Running MAB_bmc_fixed time slices 60, 120, 240, ------------------
+
+>> cd src
+
+>> python3 MAB_BMC_fixt_n.py -i ../../benchmark/HWMCC_15_17/6s7.aig > results/log_mabmc_fix_IF_6s7_D3.txt
+
+----------------- Running MAB_bmc_new time slices 60, 60, 120, 120, 120, 240 ------------------
+
+>> cd src
+
+>> python3 MAB_BMC_new_n.py -i ../../benchmark/HWMCC_15_17/6s7.aig > results/log_mabmc_IF_6s7_D3.txt
+
+----------------- Running single BMC engines from ABC ------------------
+
+>> cd src
+
+>> python3 run_abc.py -i ../../benchmark/HWMCC_15_17/6s7.aig > results/log_abc_6s7.txt
 
