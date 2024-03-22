@@ -144,3 +144,30 @@ The same commands can also be executed from bash script as follows:
 
 $> abc -c "read 6s7.aig; write_verilog 6s7.v"
 
+
+Discussion on DeepGate2+MAB-BMC on 25 Jan & 22 Mar 2024 - idea proposed by Raj
+-----------------------------------------------------------------
+
+Assume we start MAB-BMC from partition i, unfolding depth = k
+
+Case-1,  if k=1: 
+1. run DeepGate2 on complete sequential design, find similarity ranking with other designs, and check if the design is suitable to use MAB-BMC at unfolding-depth=1.
+2. Find similarity index on the design for the complete design (can contain latches as well), to find equivalence classes within the design.
+3. We can continue running the BMC engine, without MAB-BMC partitions, until we see a difficult unfolding step. we switch to Case-2 in difficult step. 
+
+Case-2, if k>1: 
+1. if we can infer the BMC engine Bi (from MAB-BMC), suitable to solve at this depth 
+we can decide for how much additional depth(or timeout) this BMC engine needs to run. Two cases could be possible if the depth we expect it reach did not reach, we can cleanup the BMC and start from the solved BMC-depth. Or we can continue BMC for 2*timeout before rechecking (decide change partition change is needed?).
+
+2. Use DeepGate2 information for checking if switching between BMC engines is useful?
+Say E0 is the calculated equivalence class candidate information on complete AIG (Sequential)
+Ek is the calculated equivalence class candidate information on AIG unfolded for k-steps.
+
+Use E0 vs Ek-1 vs Ek, to decide if switching BMC is helpful:
+2.1. Some new gates in Ek, which may be specific to kth unfolding step, but all of these fall in existing equivalent candidate classes of Ek-1 with high similarity; and Ek classes did not change - decide do we continue using the same BMC? or switch to different BMC engine.
+2.2. All new gates fall into new equivalent classes, and did not use gates from Ek-1 - Switch to a new BMC instance (because no reuse of information from unfolding step k), change to new BMC partition.
+2.3 E0 vs Ek can point if the existing BMC engine could be useful or may be starting a new BMC instance from k+1 depth.
+
+-----
+Other idea, qualification of equivalent candidate classes for a given design:
+Perform a unfolding based equivalent candidate identification in DeepGate2 to check if the equivalent candidate refinement is sufficient and point us that, since we reached unfolding depth-k, to stop/start using in our MAB-BMC method. If the equivalence classes are not changing - (1) we have calculated the equivalence gates which have high similarity, and this may not change from k to k+1 steps (2) It could be a sign that the last BMC will continue doing better.
