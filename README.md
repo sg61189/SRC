@@ -164,10 +164,13 @@ Say E0 is the calculated equivalence class candidate information on complete AIG
 Ek is the calculated equivalence class candidate information on AIG unfolded for k-steps.
 
 Use E0 vs Ek-1 vs Ek, to decide if switching BMC is helpful:
+
 2.1. Some new gates in Ek, which may be specific to kth unfolding step, but all of these fall in existing equivalent candidate classes of Ek-1 with high similarity; and Ek classes did not change - decide do we continue using the same BMC? or switch to different BMC engine.
+
 2.2. All new gates fall into new equivalent classes, and did not use gates from Ek-1 - Switch to a new BMC instance (because no reuse of information from unfolding step k), change to new BMC partition.
+
 2.3 E0 vs Ek can point if the existing BMC engine could be useful or may be starting a new BMC instance from k+1 depth.
 
------
+
 Other idea, qualification of equivalent candidate classes for a given design:
 Perform a unfolding based equivalent candidate identification in DeepGate2 to check if the equivalent candidate refinement is sufficient and point us that, since we reached unfolding depth-k, to stop/start using in our MAB-BMC method. If the equivalence classes are not changing - (1) we have calculated the equivalence gates which have high similarity, and this may not change from k to k+1 steps (2) It could be a sign that the last BMC will continue doing better.
