@@ -992,12 +992,12 @@ def main(argv):
 	#iters = int(np.log((TIMEOUT/T)*(SC-1) +1)/(np.log(SC))) + 1 # time-steps
 	episodes = 1 #episodes
 	print('iters', iters)
-	alpha = 0.6
+	alpha = 0.9
 	reward = 0
 	c = 2.0
 	# Initialize bandits
 
-	ucb1 = ucb1_bandit(k, c, iters, 1,  reward, inputfile)
+	ucb1 = ucb1_bandit(k, c, iters, alpha,  reward, inputfile)
 
 	options = [ucb1]
 	labels = [r'ucb1']
