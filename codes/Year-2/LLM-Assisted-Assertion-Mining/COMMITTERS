@@ -1,0 +1,37 @@
+This file contains the list of individuals with write access to the OpenTitan
+repository, who are responsible for the final approval and merge of
+contributions. See doc/project/committers.md for more information.
+
+Committers are listed alphabetically by surname in the format:
+* Full Name (GitHubID)
+
+Committer list:
+* Harry Callahan (hcallahan-lowrisc)
+* Greg Chadwick (GregAC)
+* Miles Dai (milesdai)
+* Jon Flatley (jon-flatley)
+* Chris Frantz (cfrantz)
+* Gary Guo (nbdd0121)
+* Jes Klinke (jesultra)
+* Andreas Kurth (andreaskurth)
+* Adrian Lees (alees24)
+* Martin Lueker-Boden (martin-lueker)
+* Marno van der Maas (marnovandermaas)
+* Rasmus Madsen (rasmus-madsen)
+* Guillermo Maturana (matutem)
+* Hugo McNally (HU90m)
+* Felix Miller (felixmiller)
+* Michael Munday (mundaym)
+* Pascal Nasahl (nasahlpa)
+* Miguel Osorio (moidx)
+* Jade Philipoom (jadephilipoom)
+* Amaury Pouly (pamaury)
+* Douglas Reis (engdoreis)
+* Dominic Rizzo (domrizz0)
+* Michael Schaffner (msfschaffner)
+* Eitan Shapira (eshapira)
+* Rupert Swarbrick (rswarbrick)
+* Timothy Trippel (timothytrippel)
+* Pirmin Vogel (vogelpi)
+* James Wainwright (jwnrt)
+* Alex Williams (a-will)

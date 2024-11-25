@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+    Copyright lowRISC contributors (OpenTitan project).
+    Licensed under the Apache License, Version 2.0, see LICENSE for details.
+    SPDX-License-Identifier: Apache-2.0
+-->
+<refinement-file-root>
+  <information comment-version="1" creation-time="Mo 17 Jun 2024 10:27:21 CEST" creator="hakim" csCheck="false" modified-by="hakim" modify-time="Mo 17 Jun 2024 13:49:31 CEST" save-ref-method="seq" tool-version="Cadence Verisium Manager22.09" rules-signature-c="fdb94238ce6e1f06284c537fc28c3b">
+    <ucm-files>
+      <ucm-file domain="icc" modelCheckSum="1459916484" path="/home/hakim/lowrisc/ot-scratch/csrng-sim-xcelium/cov_merge/merged/icc_57048ec4_251369e9.ucm"></ucm-file>
+    </ucm-files>
+  </information>
+  <rules>
+    <rule ccType="inst" domain="icc" entityName="csrng/u_csrng_core/u_csrng_block_encrypt/u_aes_cipher_core" entityType="inst" excTime="1718624949" name="exclude" recursiveMetrics="overall" reviewer="unknown" user="0" vscope="default"></rule>
+  </rules>
+  <cache-map>
+    <cache-entry key="0" value="hakim"></cache-entry>
+  </cache-map>
+</refinement-file-root>

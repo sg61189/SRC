@@ -1,0 +1,501 @@
+# Copyright lowRISC contributors (OpenTitan project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Azure Pipelines CI build configuration
+# Documentation at https://aka.ms/yaml
+
+variables:
+  #
+  # If updating VERILATOR_VERSION, TOOLCHAIN_VERSION, update the
+  # definitions in util/container/Dockerfile as well.
+  #
+  VERILATOR_VERSION: 4.210
+  TOOLCHAIN_PATH: /opt/buildcache/riscv
+  VERIBLE_VERSION: v0.0-3622-g07b310a3
+  # Release tag from https://github.com/lowRISC/lowrisc-toolchains/releases
+  TOOLCHAIN_VERSION: 20220210-1
+  # This controls where builds happen, and gets picked up by build_consts.sh.
+  BUILD_ROOT: $(Build.ArtifactStagingDirectory)
+  VIVADO_VERSION: "2021.1"
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - "*"
+    # Don't run workflow on auto-created backport branches (PR workflow will be run)
+    exclude:
+    - "backport-*"
+  tags:
+    include:
+    - "*"
+pr:
+  branches:
+    include:
+    - "*"
+
+jobs:
+- job: checkout
+  displayName: Checkout repository
+  pool:
+    vmImage: ubuntu-20.04
+  steps:
+  - checkout: self
+    path: opentitan-repo
+  - bash: |
+      tar -C $(Pipeline.Workspace)/opentitan-repo -czf $(Pipeline.Workspace)/opentitan-repo.tar.gz .
+    displayName: Pack up repository
+  - publish: $(Pipeline.Workspace)/opentitan-repo.tar.gz
+    artifact: opentitan-repo
+    displayName: Upload repository
+
+- job: lint
+  displayName: Quality (quick lint)
+  # Run code quality checks (quick lint)
+  dependsOn: checkout
+  pool: ci-public
+  steps:
+  - template: ci/checkout-template.yml
+  - template: ci/install-package-dependencies.yml
+    ## !!!
+    ##
+    ##   The steps below here are duplicated in ci/jobs/quick-lint.sh
+    ##   to allow developers to "run CI" locally. Keep them in sync.
+    ##
+    ## !!!
+  - bash: ci/scripts/show-env.sh
+    displayName: Environment Info
+    # Display environment information
+  - bash: ci/scripts/lint-commits.sh $SYSTEM_PULLREQUEST_TARGETBRANCH
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: Commit metadata
+  - bash: ci/scripts/check-licence-headers.sh $SYSTEM_PULLREQUEST_TARGETBRANCH
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: Licence Headers
+  - bash: ci/scripts/exec-check.sh
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: Executable Bits
+  - bash: ci/scripts/check-ascii.sh
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: ASCII Chars
+    # Check for non-ASCII characters in source code
+  - bash: ci/scripts/python-lint.sh $SYSTEM_PULLREQUEST_TARGETBRANCH
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: flake8 (Python lint)
+    # Run Python lint (flake8)
+  - bash: ci/scripts/mypy.sh
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: mypy (Python lint)
+    # Run Python lint (mypy)
+  - bash: ci/scripts/clang-format.sh $SYSTEM_PULLREQUEST_TARGETBRANCH
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: clang-format (C/C++ lint)
+    # Validate testplans with schema (json schema)
+  - bash: ci/scripts/validate_testplans.sh
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: Validate testplans with schema
+    # Use clang-format to check C/C++ coding style
+  - bash: ci/scripts/rust-format.sh $SYSTEM_PULLREQUEST_TARGETBRANCH
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: rustfmt
+  - bash: |
+      ci/bazelisk.sh test //quality:shellcheck_check || {
+        echo -n "##vso[task.logissue type=error]"
+        echo "Shellcheck failed. Run util/sh/scripts/run-shellcheck.sh to see errors."
+        exit 1
+      }
+    displayName: shellcheck
+  - bash: ci/scripts/include-guard.sh $SYSTEM_PULLREQUEST_TARGETBRANCH
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: Header guards
+    # Check formatting on header guards
+  - bash: ci/scripts/whitespace.sh $SYSTEM_PULLREQUEST_TARGETBRANCH
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: Check trailing whitespace
+  - bash: ci/scripts/check-links.sh
+    displayName: Check File Links
+  - bash: ci/scripts/check-cmdgen.sh
+    displayName: Check CMDGEN Blocks
+  - bash: ci/scripts/get-build-type.sh "$SYSTEM_PULLREQUEST_TARGETBRANCH" "$(Build.Reason)"
+    displayName: Type of change
+    # Check what kinds of changes the PR contains
+    name: DetermineBuildType
+  - bash: ci/scripts/check-no-bazelrc-site.sh
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    displayName: Confirm no .bazelrc-site files
+
+- job: sw_build
+  displayName: Earl Grey SW Build
+  # Build software tests for the Earl Grey toplevel design
+  timeoutInMinutes: 120
+  dependsOn: lint
+  condition: and(succeeded(), eq(dependencies.lint.outputs['DetermineBuildType.onlyDocChanges'], '0'), eq(dependencies.lint.outputs['DetermineBuildType.onlyCdcChanges'], '0'))
+  pool: ci-public
+  steps:
+  - template: ci/checkout-template.yml
+  - template: ci/install-package-dependencies.yml
+  - template: ci/load-bazel-cache-write-creds.yml
+  - bash: |
+      set -x -e
+
+      # Check the entire build graph for conflicts in loading or analysis
+      # phases. For context, see issue #18726.
+      # First, test with an empty bitstream cache entry.
+      ci/scripts/test-empty-bitstream-cache.sh
+      # Now redo with the real bitstream cache included.
+      ci/bazelisk.sh build --nobuild //...
+
+      # This command selects the unit tests to be built:
+      # * It excludes //quality because that's the purview of `slow_lints`.
+      # * It excludes //sw/otbn/crypto because that's tested in `otbn_crypto_tests`.
+      # * It excludes the tests from //third_party/riscv-compliance because
+      #   they're already covered by `execute_fpga_tests_cw310`.
+      # * It excludes //hw:all to avoid building Verilator, which is pulled in
+      #   because //... effectively asks to build //hw:verilator_real and other
+      #   targets in //hw:all that depend on it. Note that this is only a
+      #   shallow exclusion; tests deeper under //hw will still be found.
+      # * It excludes targets that depend on bitstream_splice rules, since the
+      #   environment does not have access to Vivado.
+      # * It excludes all <ip>_regs targets under //hw/ip_templates, since
+      #   it makes no sense to build these under ip_templates. These IPs need
+      #   to be updated as more migrate to ipgen.
+      TARGET_PATTERN_FILE=target_pattern.txt
+      echo //... > "${TARGET_PATTERN_FILE}"
+      echo -//quality/... >> "${TARGET_PATTERN_FILE}"
+      echo -//sw/otbn/crypto/... >> "${TARGET_PATTERN_FILE}"
+      echo -//third_party/riscv-compliance/... >> "${TARGET_PATTERN_FILE}"
+      echo -//hw:all >> "${TARGET_PATTERN_FILE}"
+      ci/bazelisk.sh cquery \
+        --noinclude_aspects \
+        --output=starlark \
+        --starlark:expr='"-{}".format(target.label)' \
+        --define DISABLE_VERILATOR_BUILD=true \
+        -- "rdeps(//..., kind(bitstream_splice, //...))" \
+        >> "${TARGET_PATTERN_FILE}"
+
+      # Build all unit tests and their dependencies.
+      ci/bazelisk.sh build \
+        --build_tests_only=false \
+        --define DISABLE_VERILATOR_BUILD=true \
+        --test_tag_filters=-broken,-cw310,-verilator,-dv \
+        --target_pattern_file="${TARGET_PATTERN_FILE}"
+    displayName: Build SW
+  - publish: target_pattern.txt
+    artifact: target_pattern_file
+  - bash: |
+      set -x -e
+      . util/build_consts.sh
+      # copy the rom to a specific location
+      ROM_TARGET="${BIN_DIR}/sw/device/silicon_creator/rom"
+      mkdir -p "${ROM_TARGET}"
+      ROM_REAL_TARGETS="//sw/device/silicon_creator/rom:package"
+      QUERY_CMD_ARGS=(outquery-all --noinclude_aspects --noimplicit_deps)
+      ROM_REAL_FILES=($(ci/bazelisk.sh "${QUERY_CMD_ARGS[@]}" "${ROM_REAL_TARGETS}" | sort | uniq))
+      cp -Lvt "${ROM_TARGET}" "${ROM_REAL_FILES[@]}"
+  - template: ci/upload-artifacts-template.yml
+    parameters:
+      includePatterns:
+        - "/sw/***"
+
+- job: execute_verilated_tests
+  displayName: Fast Verilated Earl Grey tests
+  # Build and run fast tests on sim_verilator
+  pool: ci-public
+  timeoutInMinutes: 240
+  dependsOn: lint
+  steps:
+  - template: ci/checkout-template.yml
+  - template: ci/install-package-dependencies.yml
+  - template: ci/load-bazel-cache-write-creds.yml
+  - bash: |
+      set -x -e
+      ci/scripts/run-verilator-tests.sh
+    displayName: Build & execute tests
+  - template: ci/publish-bazel-test-results.yml
+  # TODO: build and cache the verilator model to avoid building twice (#12574)
+  # NOTE: The new build/test rules reference verilator as a dependency, but under the
+  #       platforms transition of that rule.  Therefore, verilator is built under a
+  #       configuration like 'k8-opt-exec-$host-FOR-$target'.  In order to get the
+  #       verilator binary, we query the output of one of the verilated tests and ask
+  #       for the verilator binary, which is in a subdir named 'build.verilator_<stuff>'.
+  - bash: |
+      . util/build_consts.sh
+      mkdir -p "$BIN_DIR/hw/top_earlgrey/"
+      cp $(ci/bazelisk.sh outquery-build.verilator //sw/device/tests:uart_smoketest_sim_verilator) \
+        "$BIN_DIR/hw/top_earlgrey/Vchip_earlgrey_verilator"
+    displayName: Copy verilated binary to $BIN_DIR
+  - template: ci/upload-artifacts-template.yml
+    parameters:
+      includePatterns:
+        - "/hw/top_earlgrey/Vchip_earlgrey_verilator"
+
+- job: otbn_standalone_tests
+  displayName: Run OTBN Smoke Test
+  dependsOn: lint
+  condition: and(succeeded(), eq(dependencies.lint.outputs['DetermineBuildType.onlyCdcChanges'], '0'))
+  pool:
+    vmImage: ubuntu-20.04
+  timeoutInMinutes: 10
+  steps:
+  - template: ci/checkout-template.yml
+  - template: ci/install-package-dependencies.yml
+  - bash: |
+      set -x
+      sudo util/get-toolchain.py \
+        --install-dir="$TOOLCHAIN_PATH" \
+        --release-version="$TOOLCHAIN_VERSION" \
+        --update
+      echo "##vso[task.prependpath]$TOOLCHAIN_PATH/bin"
+    displayName: Install toolchain
+  - bash: |
+      python3 --version
+      fusesoc --version
+      verilator --version
+    displayName: Display environment
+  - bash: |
+      make -C hw/ip/otbn/dv/otbnsim test
+    displayName: OTBN ISS Test
+  - bash: |
+      ./hw/ip/otbn/dv/smoke/run_smoke.sh
+    displayName: OTBN Smoke Test
+  - bash: |
+      make -C hw/ip/otbn/util asm-check
+    displayName: Assemble & link code snippets
+
+- job: otbn_crypto_tests
+  displayName: Run OTBN crypto tests
+  dependsOn: lint
+  condition: and(succeeded(), eq(dependencies.lint.outputs['DetermineBuildType.onlyCdcChanges'], '0'))
+  pool:
+    vmImage: ubuntu-20.04
+  timeoutInMinutes: 60
+  steps:
+  - template: ci/checkout-template.yml
+  - template: ci/install-package-dependencies.yml
+  - template: ci/load-bazel-cache-write-creds.yml
+  - bash: |
+      ci/bazelisk.sh test --test_tag_filters=-nightly //sw/otbn/crypto/...
+    displayName: Execute tests
+
+- job: chip_earlgrey_cw310
+  displayName: CW310's Earl Grey Bitstream
+  # Build CW310 variant of the Earl Grey toplevel design using Vivado
+  dependsOn:
+    - lint
+  condition: and(succeeded(), eq(dependencies.lint.outputs['DetermineBuildType.onlyDocChanges'], '0'), eq(dependencies.lint.outputs['DetermineBuildType.onlyDvChanges'], '0'), eq(dependencies.lint.outputs['DetermineBuildType.onlyCdcChanges'], '0'))
+  pool: ci-public-eda
+  timeoutInMinutes: 240
+  steps:
+  - template: ci/fpga-template.yml
+    parameters:
+      top_name: earlgrey
+      design_suffix: cw310
+
+- job: chip_earlgrey_cw310_hyperdebug
+  displayName: CW310's Earl Grey Bitstream for Hyperdebug
+  # Build CW310-hyperdebug variant of the Earl Grey toplevel design using Vivado
+  dependsOn:
+    - lint
+  condition: and(succeeded(), eq(dependencies.lint.outputs['DetermineBuildType.onlyDocChanges'], '0'), eq(dependencies.lint.outputs['DetermineBuildType.onlyDvChanges'], '0'), eq(dependencies.lint.outputs['DetermineBuildType.onlyCdcChanges'], '0'))
+  pool: ci-public-eda
+  timeoutInMinutes: 240
+  steps:
+  - template: ci/fpga-template.yml
+    parameters:
+      top_name: earlgrey
+      design_suffix: cw310_hyperdebug
+
+- job: chip_earlgrey_cw340
+  displayName: CW340's Earl Grey Bitstream
+  # Build CW340 variant of the Earl Grey toplevel design using Vivado
+  dependsOn:
+    - lint
+  condition: and(succeeded(), eq(dependencies.lint.outputs['DetermineBuildType.onlyDocChanges'], '0'), eq(dependencies.lint.outputs['DetermineBuildType.onlyDvChanges'], '0'), eq(dependencies.lint.outputs['DetermineBuildType.onlyCdcChanges'], '0'))
+  pool: ci-public-eda
+  timeoutInMinutes: 150
+  steps:
+  - template: ci/fpga-template.yml
+    parameters:
+      top_name: earlgrey
+      design_suffix: cw340
+
+# CW310 FPGA jobs.
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_test_rom_fpga_tests_cw310
+    display_name: CW310 Test ROM Tests
+    bitstream: chip_earlgrey_cw310
+    interface: cw310
+    board: cw310
+    tag_filters: cw310_test_rom
+    timeout: 60
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_rom_fpga_tests_cw310
+    display_name: CW310 ROM Tests
+    bitstream: chip_earlgrey_cw310
+    interface: cw310
+    board: cw310
+    tag_filters: "cw310_rom_with_fake_keys,cw310_rom_with_real_keys,-manuf"
+    timeout: 90
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_rom_ext_fpga_tests_cw310
+    display_name: CW310 ROM_EXT Tests
+    bitstream: chip_earlgrey_cw310
+    interface: cw310
+    board: cw310
+    tag_filters: cw310_rom_ext
+    timeout: 60
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_sival_fpga_tests_cw310
+    display_name: CW310 SiVal Tests
+    bitstream: chip_earlgrey_cw310_hyperdebug
+    interface: hyper310
+    board: cw310
+    tag_filters: "cw310_sival,-manuf"
+    timeout: 60
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_sival_rom_ext_fpga_tests_cw310
+    display_name: CW310 SiVal ROM_EXT Tests
+    bitstream: chip_earlgrey_cw310_hyperdebug
+    interface: hyper310
+    board: cw310
+    tag_filters: cw310_sival_rom_ext
+    timeout: 60
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_manuf_fpga_tests_cw310
+    display_name: CW310 Manufacturing Tests
+    bitstream: chip_earlgrey_cw310_hyperdebug
+    interface: hyper310
+    board: cw310
+    tag_filters: "manuf,-cw340"
+    timeout: 60
+
+# CW340 FPGA jobs.
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_test_rom_fpga_tests_cw340
+    display_name: CW340 Test ROM Tests
+    bitstream: chip_earlgrey_cw340
+    interface: cw340
+    board: cw340
+    tag_filters: cw340_test_rom
+    timeout: 60
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_rom_fpga_tests_cw340
+    display_name: CW340 ROM Tests
+    bitstream: chip_earlgrey_cw340
+    interface: cw340
+    board: cw340
+    tag_filters: "cw340_rom_with_fake_keys,cw340_rom_with_real_keys,-manuf"
+    timeout: 60
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_rom_ext_fpga_tests_cw340
+    display_name: CW340 ROM_EXT Tests
+    bitstream: chip_earlgrey_cw340
+    interface: cw340
+    board: cw340
+    tag_filters: cw340_rom_ext
+    timeout: 60
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_sival_fpga_tests_cw340
+    display_name: CW340 SiVal Tests
+    bitstream: chip_earlgrey_cw340
+    interface: cw340
+    board: cw340
+    tag_filters: "cw340_sival,-manuf"
+    timeout: 60
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_sival_rom_ext_fpga_tests_cw340
+    display_name: CW340 SiVal ROM_EXT Tests
+    bitstream: chip_earlgrey_cw340
+    interface: cw340
+    board: cw340
+    tag_filters: cw340_sival_rom_ext
+    timeout: 60
+
+- template: ci/fpga-job.yml
+  parameters:
+    job_name: execute_manuf_fpga_tests_cw340
+    display_name: CW340 Manufacturing Tests
+    bitstream: chip_earlgrey_cw340
+    interface: cw340
+    board: cw340
+    tag_filters: "manuf,-hyper310"
+    timeout: 60
+
+# Verify that we have indeed run all jobs without duplication
+- template: ci/verify-fpga-jobs.yml
+  parameters:
+    fpga_tags: fpga
+    fpga_jobs:
+      - execute_test_rom_fpga_tests_cw310
+      - execute_rom_fpga_tests_cw310
+      - execute_rom_ext_fpga_tests_cw310
+      - execute_sival_fpga_tests_cw310
+      - execute_sival_rom_ext_fpga_tests_cw310
+      - execute_manuf_fpga_tests_cw310
+      - execute_test_rom_fpga_tests_cw340
+      - execute_rom_fpga_tests_cw340
+      - execute_rom_ext_fpga_tests_cw340
+      - execute_sival_fpga_tests_cw340
+      - execute_sival_rom_ext_fpga_tests_cw340
+      - execute_manuf_fpga_tests_cw340
+
+- job: deploy_release_artifacts
+  displayName: Package & deploy release
+  pool:
+    vmImage: ubuntu-20.04
+  dependsOn:
+    - lint
+    - sw_build
+    - execute_verilated_tests
+    - chip_earlgrey_cw310
+  condition: and(eq(dependencies.lint.outputs['DetermineBuildType.onlyDocChanges'], '0'), eq(dependencies.lint.outputs['DetermineBuildType.onlyDvChanges'], '0'), eq(dependencies.lint.outputs['DetermineBuildType.onlyCdcChanges'], '0'))
+  steps:
+  - template: ci/checkout-template.yml
+  - template: ci/install-package-dependencies.yml
+  - template: ci/download-artifacts-template.yml
+    parameters:
+      downloadPartialBuildBinFrom:
+        - sw_build
+        - execute_verilated_tests
+        - chip_earlgrey_cw310
+  - bash: |
+      . util/build_consts.sh
+      ci/scripts/make_distribution.sh
+      tar --list -f $BIN_DIR/opentitan-*.tar.xz
+      # Put the resulting tar file into a directory the |publish| step below can reference.
+      mkdir "$BUILD_ROOT/dist-final"
+      mv $BIN_DIR/opentitan-*.tar.xz "$BUILD_ROOT/dist-final"
+    displayName: Create final dist
+  - publish: $(Build.ArtifactStagingDirectory)/dist-final
+    artifact: opentitan-dist
+    displayName: Upload release
+  - task: GithubRelease@0
+    displayName: Upload to GitHub releases (only tags)
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    inputs:
+      gitHubConnection: opentitan-release-upload
+      repositoryName: lowrisc/opentitan
+      addChangeLog: false
+      assets: |
+          $(Build.ArtifactStagingDirectory)/dist-final/*

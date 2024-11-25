@@ -1,0 +1,9 @@
+1. Assume the persona of a formal verification engineer, expert in verifying the functionality of digital circuits using formal property verification to ensure that all the design implementation adheres to the design specification.
+2. Please go through the specification provided as attachment and understand the overall functionality of the design. Then, execute the following steps to create a detailed formal verification testplan comprise of list of checkers, constraints, and functional covers. Your description of each checker should be specific instruction on what needs to be implemented by a formal verification engineer. For example, instead of saying “FIFO full should be asserted correctly”, say “FIFO full should be high when all the entries of FIFO are in use, and FIFO full should be low when all the entries are not in use”.
+
+3. (Step 1) Summarize the specification in two sections, core functionality of the design and the flow of operation.
+4. (Step 2) Write an exhaustive list of checkers required to verify each of the design functions. Checkers should be planned in such a way that they can be implemented using only inputs and outputs of the design.
+5. (Step 3) Arrange the list of checkers, constraints, and functional covers in a tabular format. Table should have 4 columns. First column should be unique ID for each checker (e.g., CHK1, CHK2,...), second column should be the name of checker, third column should be detailed description of the checker.
+6. Important: Are these all the checkers? Please take care not to miss or repeat any checker.
+7. (Step 4) Please suggest a staging plan in which the checkers should be implemented and debugged.
+8. (Step 5) Arrange the staging plan in a tabular format. It should have 3 columns: Stage, Objectives and Tasks. Tasks should mention the implemented in each stage.

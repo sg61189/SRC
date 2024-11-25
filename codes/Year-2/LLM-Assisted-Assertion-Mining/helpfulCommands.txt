@@ -1,0 +1,8 @@
+## To Run dvsim
+$REPO_TOP/util/dvsim/dvsim.py $REPO_TOP/hw/ip/<IP_NAME>/dv/<IP_NAME>_sim_cfg.hjson -i <IP_NAME>_full_random --tool xcelium
+
+## To Run FPVgen
+$REPO_TOP/util/fpvgen.py -c $REPO_TOP/hw/ip/<IP_NAME>/rtl/<IP_NAME>.sv
+
+## To Run Dvsim on non comportable IPs for Top Earlgrey
+$REPO_TOP/util/dvsim/dvsim.py $REPO_TOP/hw/top_earlgrey/formal/top_earlgrey_fpv_prim_cfgs.hjson --select-cfgs prim_packer_fpv
