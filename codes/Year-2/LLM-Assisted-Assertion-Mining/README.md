@@ -1,4 +1,4 @@
-# AGASTYA-V
+# LLM Assisted Assertion Mining 
 
 ### This is the official repository to setup, build and experiment LLM assisted Formal Verification on difrerent OpenTitan IPs. This project is consisting of Three major parts. 
 ### 1. Having a FV Tool (eg. JasperGold)
