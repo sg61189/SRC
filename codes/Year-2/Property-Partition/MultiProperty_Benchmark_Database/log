@@ -1,0 +1,61 @@
+ABC command line: "read 6s101.aig;bmc3 -v -a -g -T 10".
+
+Running "bmc3". PI/PO/Reg = 113/6/973. And =   6166. Lev =    27. ObjNums =  4769.
+Params: FramesMax = 0. Start = 0. ConfLimit = 0. TimeOut = 10. SolveAll = 1.
+   0 + : Var =       1. Cla =        0. Conf =      0. Learn =      0. CEX =    0.    0 MB   0 MB     0.02 sec 
+   1 + : Var =       1. Cla =        0. Conf =      0. Learn =      0. CEX =    0.    0 MB   0 MB     0.02 sec 
+   2 + : Var =       1. Cla =        0. Conf =      0. Learn =      0. CEX =    0.    0 MB   0 MB     0.02 sec 
+   3 + : Var =       1. Cla =        0. Conf =      0. Learn =      0. CEX =    0.    0 MB   0 MB     0.02 sec 
+   4 + : Var =       1. Cla =        0. Conf =      0. Learn =      0. CEX =    0.    0 MB   0 MB     0.02 sec 
+   5 + : Var =       1. Cla =        0. Conf =      0. Learn =      0. CEX =    0.    0 MB   0 MB     0.02 sec 
+   6 + : Var =       1. Cla =        0. Conf =      0. Learn =      0. CEX =    0.    0 MB   0 MB     0.02 sec 
+   7 + : Var =       1. Cla =        0. Conf =      0. Learn =      0. CEX =    0.    0 MB   0 MB     0.02 sec 
+   8 + : Var =       1. Cla =        0. Conf =      0. Learn =      0. CEX =    0.    0 MB   0 MB     0.02 sec 
+   9 + : Var =    8247. Cla =    29602. Conf =      1. Learn =      0. CEX =    0.    0 MB   0 MB     0.03 sec 
+  10 + : Var =   10983. Cla =    40404. Conf =      6. Learn =      1. CEX =    0.    0 MB   0 MB     0.04 sec 
+  11 + : Var =   14186. Cla =    53620. Conf =     41. Learn =     11. CEX =    0.    0 MB   0 MB     0.04 sec 
+  12 + : Var =   16867. Cla =    64556. Conf =     73. Learn =     22. CEX =    0.    0 MB   0 MB     0.05 sec 
+  13 + : Var =   19544. Cla =    75513. Conf =    107. Learn =     35. CEX =    0.    0 MB   0 MB     0.05 sec 
+  14 + : Var =   22221. Cla =    86473. Conf =    136. Learn =     44. CEX =    0.    0 MB   0 MB     0.06 sec 
+  15 + : Var =   24898. Cla =    97409. Conf =    157. Learn =     52. CEX =    0.    0 MB   0 MB     0.06 sec 
+  16 + : Var =   27575. Cla =   108373. Conf =    184. Learn =     67. CEX =    0.    0 MB   0 MB     0.07 sec 
+  17 + : Var =   30252. Cla =   119337. Conf =    214. Learn =     86. CEX =    0.    0 MB   0 MB     0.07 sec 
+  18 + : Var =   32929. Cla =   130305. Conf =    243. Learn =    109. CEX =    0.    0 MB   0 MB     0.07 sec 
+  19 + : Var =   35606. Cla =   141275. Conf =    283. Learn =    143. CEX =    0.    0 MB   0 MB     0.08 sec 
+  20 + : Var =   38283. Cla =   152245. Conf =    338. Learn =    191. CEX =    0.    0 MB   0 MB     0.08 sec 
+  21 + : Var =   40960. Cla =   163215. Conf =    399. Learn =    245. CEX =    0.    0 MB   0 MB     0.09 sec 
+  22 + : Var =   43637. Cla =   174185. Conf =    450. Learn =    288. CEX =    0.    0 MB   0 MB     0.09 sec 
+  23 + : Var =   46314. Cla =   185155. Conf =    516. Learn =    348. CEX =    0.    0 MB   0 MB     0.10 sec 
+  24 + : Var =   48991. Cla =   196125. Conf =    593. Learn =    417. CEX =    0.    0 MB   0 MB     0.10 sec 
+  25 + : Var =   51668. Cla =   204754. Conf =    688. Learn =    439. CEX =    0.    0 MB   0 MB     0.11 sec 
+  26 + : Var =   54345. Cla =   215724. Conf =    782. Learn =    527. CEX =    0.    0 MB   0 MB     0.12 sec 
+  27 + : Var =   57022. Cla =   226694. Conf =    935. Learn =    674. CEX =    0.    1 MB   0 MB     0.12 sec 
+  28 + : Var =   59699. Cla =   237664. Conf =   1089. Learn =    822. CEX =    0.    1 MB   0 MB     0.13 sec 
+  29 + : Var =   62376. Cla =   248634. Conf =   1284. Learn =   1011. CEX =    0.    1 MB   0 MB     0.13 sec 
+  30 + : Var =   65053. Cla =   259604. Conf =   1482. Learn =   1203. CEX =    0.    1 MB   0 MB     0.14 sec 
+  31 + : Var =   67730. Cla =   270574. Conf =   1694. Learn =   1409. CEX =    0.    1 MB   0 MB     0.15 sec 
+  32 + : Var =   70407. Cla =   281544. Conf =   1951. Learn =   1660. CEX =    0.    1 MB   0 MB     0.15 sec 
+  33 + : Var =   73084. Cla =   292514. Conf =   2146. Learn =   1034. CEX =    0.    1 MB   0 MB     0.16 sec 
+  34 + : Var =   75761. Cla =   303484. Conf =   2596. Learn =   1478. CEX =    0.    1 MB   0 MB     0.17 sec 
+  35 + : Var =   78438. Cla =   314454. Conf =   2757. Learn =   1633. CEX =    0.    1 MB   0 MB     0.18 sec 
+  36 + : Var =   81115. Cla =   325424. Conf =   2932. Learn =   1802. CEX =    0.    1 MB   0 MB     0.19 sec 
+  37 + : Var =   83792. Cla =   336394. Conf =   3244. Learn =   2108. CEX =    0.    1 MB   0 MB     0.19 sec 
+  38 + : Var =   86469. Cla =   347364. Conf =   3561. Learn =   2419. CEX =    0.    1 MB   0 MB     0.21 sec 
+  39 + : Var =   89146. Cla =   357921. Conf =   4464. Learn =   3314. CEX =    0.    1 MB   0 MB     0.23 sec 
+  40 + : Var =   91823. Cla =   368891. Conf =   5070. Learn =   3914. CEX =    0.    1 MB   0 MB     0.24 sec 
+  41 + : Var =   94500. Cla =   379861. Conf =   5533. Learn =   4371. CEX =    0.    1 MB   0 MB     0.25 sec 
+  42 + : Var =   97177. Cla =   390831. Conf =   5872. Learn =   4704. CEX =    0.    1 MB   0 MB     0.26 sec 
+  43 + : Var =   99854. Cla =   401801. Conf =   6275. Learn =   5101. CEX =    0.    1 MB   0 MB     0.28 sec 
+  44 + : Var =  102531. Cla =   412771. Conf =   7004. Learn =   5824. CEX =    0.    1 MB   0 MB     0.29 sec 
+  45 + : Var =  105208. Cla =   423741. Conf =   7870. Learn =   6684. CEX =    0.    1 MB   0 MB     0.31 sec 
+  46 + : Var =  107885. Cla =   434417. Conf =   9940. Learn =   5458. CEX =    0.    1 MB   0 MB     0.40 sec 
+  47 + : Var =  110562. Cla =   445387. Conf =  11650. Learn =   7152. CEX =    0.    1 MB   0 MB     0.46 sec 
+  48 + : Var =  113239. Cla =   442656. Conf =  24750. Learn =  12363. CEX =    0.    1 MB   0 MB     2.60 sec 
+  49 + : Var =  115916. Cla =   450129. Conf =  43765. Learn =  20944. CEX =    0.    1 MB   0 MB     5.34 sec 
+  50 + : Var =  118593. Cla =   459829. Conf =  64555. Learn =  27071. CEX =    0.    1 MB   0 MB     9.44 sec 
+Runtime:  CNF = 0.2 sec (1.7 %)  UNSAT = 9.5 sec (94.5 %)  SAT = 0.0 sec (0.0 %)  UNDEC = 0.4 sec (3.5 %)
+LStart(P) = 0  LDelta(Q) = 0  LRatio(R) = 0  ReduceDB = 0  Vars = 121270  Used = 0 (0.00 %)
+Buffs = 7609. Dups = 0.   Hash hits = 330.  Hash misses = 115769.  UniProps = 0.
+**********************SRC2024 51
+ ********************No output asserted in 51 frames. Resource limit reached (timeout 10 sec). Time =    10.06 sec
+**********************Hello Soumik ********************

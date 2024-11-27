@@ -1,0 +1,55 @@
+bmcc --help
+bmc3  --help
+close
+exit
+bmc3 -v -a -g -T 60
+read 6s104.aig
+bmc3 -v -g -T 60
+bmc3 -v -a -g -T 30 ; pl
+read 6s250.aig 
+read 6s264.aig 
+bmc3 -v -a -g -T 10
+read 6s101.aig
+&get
+bmc3 -g   -S 0 -T 0  -F 5 -v
+read 6s104.aig 
+bmc3 -v -a  -g -T 10
+fold
+read 6s107.aig 
+cone -s -R 2 -O 1,3
+cone -s -R 2 -O 0,3
+bmc3 -v -a -g -T 60
+cone -s -R 3 -O 0,1,2
+cone -s -R 2 -O 0,5
+bmc3 -v -a -g -T 30
+cone -s -R 2 -O 1,0
+cone -s -R 2 -O 4,0
+read 6s404.aig 
+cone -s -R 2 -O 5,0
+read 6s107.aig
+swappos -N 3
+cone -s -R 2 -O 0
+source -s abc.rc
+cone -s -O 11 -R 1
+read 6s303.aig
+read 6s330.aig
+swappos -N 1
+swappos 0N 4
+bmc3 -v -a -g -T 10
+exit
+read 6s330.aig 
+swappos -N 1
+swappos -N 4
+swappos -N 2
+swappos -N 11
+swappos -N 3
+cone -s -O 1 -R 3
+bmc3 -v -a -g -T 20
+read 6s351.aig
+cone -s -O 3 -R 1
+bmc3 -g -a -v -T 15
+exit
+bmc3 -g -a -v -T 30
+source -s abc.rc
+read 6s141.aig
+fold
